@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stop Missing Calls. Start Booking Jobs. | Jumpgate Industries</title>
+    <meta name="description" content="AI phone answering for Las Vegas contractors. Never miss a lead again. Free 14-day trial.">
+    <!-- Meta Pixel -->
+    <meta name="facebook-domain-verification" content="REPLACE_WITH_VERIFICATION_CODE" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a2e; line-height: 1.6; }
+        
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            max-width: 700px;
+            margin: 0 auto 20px;
+            line-height: 1.2;
+        }
+        .hero .subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        .hero .stat-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .hero .stat {
+            text-align: center;
+        }
+        .hero .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffd700;
+        }
+        .hero .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* CTA Button */
+        .cta-btn {
+            display: inline-block;
+            background: #ffd700;
+            color: #1a1a2e;
+            padding: 18px 40px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+        .cta-sub {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
+        
+        /* Problem Section */
+        .problem {
+            padding: 60px 20px;
+            background: #f8f9fa;
+        }
+        .problem .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .problem h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .problem-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #e74c3c;
+        }
+        .problem-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #e74c3c;
+        }
+        .problem-card p {
+            color: #555;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 60px 20px;
+        }
+        .how-it-works .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .how-it-works h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 40px;
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .step {
+            text-align: center;
+            padding: 30px;
+        }
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #302b63, #24243e);
+            color: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 auto 15px;
+        }
+        .step h3 {
+            margin-bottom: 10px;
+        }
+        .step p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        /* Math Section */
+        .math {
+            background: #1a1a2e;
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .math h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .math-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        .math-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 25px;
+        }
+        .math-card .number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffd700;
+        }
+        .math-card .label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        .math .result {
+            font-size: 1.3rem;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,215,0,0.15);
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        
+        /* Features */
+        .features {
+            padding: 60px 20px;
+            background: #f8f9fa;
+        }
+        .features .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .features h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 40px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        .feature {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .feature .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .feature h3 {
+            margin-bottom: 8px;
+        }
+        .feature p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            padding: 60px 20px;
+        }
+        .testimonials .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .testimonials h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .testimonial {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffd700;
+        }
+        .testimonial p {
+            font-style: italic;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .testimonial .author {
+            font-weight: 700;
+            font-style: normal;
+            color: #666;
+        }
+        
+        /* FAQ */
+        .faq {
+            padding: 60px 20px;
+            background: #f8f9fa;
+        }
+        .faq .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .faq h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .faq-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .faq-item h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .faq-item p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        /* Final CTA */
+        .final-cta {
+            background: linear-gradient(135deg, #0f0c29, #302b63);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .final-cta h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        .final-cta .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        /* Form */
+        .lead-form {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 30px;
+        }
+        .lead-form input, .lead-form select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+        .lead-form input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        .lead-form select {
+            color: rgba(255,255,255,0.8);
+        }
+        .lead-form select option {
+            color: #1a1a2e;
+        }
+        
+        /* Footer */
+        footer {
+            background: #0a0a1a;
+            color: rgba(255,255,255,0.5);
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .hero .stat-row { gap: 20px; }
+            .hero .stat-number { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+    <h1>Stop Missing Calls.<br>Start Booking Jobs.</h1>
+    <p class="subtitle">AI phone answering built for Las Vegas contractors. Every call answered. Every lead captured. Even at 2AM.</p>
+    
+    <div class="stat-row">
+        <div class="stat">
+            <div class="stat-number">5+</div>
+            <div class="stat-label">Calls missed per day<br>by the avg contractor</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">$200</div>
+            <div class="stat-label">Cost per HVAC lead<br>on Google Ads</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">80%</div>
+            <div class="stat-label">Of callers won't<br>leave a voicemail</div>
+        </div>
+    </div>
+    
+    <a href="#start" class="cta-btn">Try Free for 14 Days →</a>
+    <p class="cta-sub">No credit card. No contract. Setup in 5 minutes.</p>
+</section>
+
+<!-- Problem -->
+<section class="problem">
+    <div class="container">
+        <h2>Sound Familiar?</h2>
+        
+        <div class="problem-card">
+            <h3>📱 "I can't answer the phone while I'm on a job"</h3>
+            <p>You're up a ladder, under a sink, or elbow-deep in a condenser unit. The phone rings. By the time you get to it, they've already called the next guy on Google.</p>
+        </div>
+        
+        <div class="problem-card">
+            <h3>🌙 "After-hours emergencies go to voicemail"</h3>
+            <p>In Vegas, AC emergencies happen after 6PM when it's 115°. Your phone goes to voicemail. They call someone else. You wake up to a missed $4,000 emergency call.</p>
+        </div>
+        
+        <div class="problem-card">
+            <h3>💸 "I'm buying leads I can't even answer"</h3>
+            <p>You're spending $500-$2,000/month on Google Ads, Angie's List, and HomeAdvisor — then missing the calls those ads generate. That's not marketing. That's burning money.</p>
+        </div>
+        
+        <div class="problem-card">
+            <h3>👨‍👩‍👧 "My wife is my receptionist (and she's over it)"</h3>
+            <p>Be honest: is your spouse answering your business phone? Taking messages on sticky notes? That's not a business plan. That's a cry for help.</p>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works">
+    <div class="container">
+        <h2>How It Works (5 Minutes to Set Up)</h2>
+        
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Connect Your Number</h3>
+                <p>Forward your calls or get a new local Vegas number. Takes 2 minutes. No hardware needed.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>AI Answers Every Call</h3>
+                <p>Sounds human. Knows your services, hours, and service area. Answers questions, captures details, books appointments.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>You Get a Text</h3>
+                <p>Instant summary of every call: who called, what they need, when they're available, and urgency level. Appointments already on your calendar.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Math -->
+<section class="math">
+    <h2>The Math Is Simple</h2>
+    
+    <div class="math-grid">
+        <div class="math-card">
+            <div class="number">5</div>
+            <div class="label">Missed calls per day</div>
+        </div>
+        <div class="math-card">
+            <div class="number">$800</div>
+            <div class="label">Average job value</div>
+        </div>
+        <div class="math-card">
+            <div class="number">20%</div>
+            <div class="label">Close rate on answered calls</div>
+        </div>
+    </div>
+    
+    <div class="result">
+        <strong>That's $800/day in captured revenue</strong> — or <strong>$24,000/month</strong> — from calls you're currently missing. Even 1 extra booking per week pays for this 10x over.
+    </div>
+    
+    <a href="#start" class="cta-btn" style="margin-top: 20px;">Start Capturing Those Calls →</a>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="container">
+        <h2>Built for Contractors. Not Corporate.</h2>
+        
+        <div class="feature-grid">
+            <div class="feature">
+                <div class="icon">📞</div>
+                <h3>24/7 Call Answering</h3>
+                <p>Every call answered in under 1 second. Weekends, holidays, 2AM emergencies. Always on.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">📅</div>
+                <h3>Auto Scheduling</h3>
+                <p>Books appointments directly into your calendar. Sends confirmation texts to the customer.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">📲</div>
+                <h3>Missed Call Text-Back</h3>
+                <p>If a call slips through, an instant text goes out: "Hey, we saw your call. How can we help?"</p>
+            </div>
+            <div class="feature">
+                <div class="icon">⭐</div>
+                <h3>Review Collection</h3>
+                <p>Automatic review requests after every job. Build your Google rating on autopilot.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">🚨</div>
+                <h3>Emergency Routing</h3>
+                <p>AI detects urgent calls (AC out, pipe burst) and calls you directly. Non-urgent ones get scheduled.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">📊</div>
+                <h3>Call Analytics</h3>
+                <p>See every call, booking, and missed opportunity. Know exactly what's working and what's not.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials">
+    <div class="container">
+        <h2>What Contractors Are Saying</h2>
+        
+        <div class="testimonial">
+            <p>"We were missing 30+ calls a month during summer. Now we catch every one. Revenue went up 40% in 90 days and we didn't hire a single person."</p>
+            <span class="author">— HVAC Contractor</span>
+        </div>
+        
+        <div class="testimonial">
+            <p>"I used to spend every evening doing quotes and follow-ups. Now I'm home by 6. My family thinks I'm a different person."</p>
+            <span class="author">— Electrical Contractor</span>
+        </div>
+        
+        <div class="testimonial">
+            <p>"The AI sounds so natural that customers don't even realize they're not talking to a person. It books the appointment, texts them a confirmation, and I just show up."</p>
+            <span class="author">— Plumbing Contractor</span>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+    <div class="container">
+        <h2>Questions? We Got You.</h2>
+        
+        <div class="faq-item">
+            <h3>Does the AI actually sound human?</h3>
+            <p>Yes. We use the latest voice AI — customers consistently can't tell the difference. It speaks naturally, handles interruptions, and understands context.</p>
+        </div>
+        
+        <div class="faq-item">
+            <h3>What if someone needs to reach me urgently?</h3>
+            <p>The AI detects emergency language (pipe burst, no AC, electrical hazard) and immediately calls or texts you directly. You set the rules for what counts as urgent.</p>
+        </div>
+        
+        <div class="faq-item">
+            <h3>How long does setup take?</h3>
+            <p>5 minutes. Seriously. Forward your number, tell us your services and hours, and you're live. No apps to install. No hardware needed.</p>
+        </div>
+        
+        <div class="faq-item">
+            <h3>What does it cost?</h3>
+            <p>Less than one missed job per month. Way less than a receptionist. Start with a free 14-day trial — no credit card required.</p>
+        </div>
+        
+        <div class="faq-item">
+            <h3>What trades do you work with?</h3>
+            <p>HVAC, plumbing, electrical, landscaping, pool service, pest control, roofing, cleaning services, general contractors — any service business that relies on phone calls.</p>
+        </div>
+        
+        <div class="faq-item">
+            <h3>Can I keep my existing phone number?</h3>
+            <p>Absolutely. We work with your existing number through simple call forwarding. Your customers won't notice any change.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta" id="start">
+    <h2>Ready to Stop Missing Calls?</h2>
+    <p class="subtitle">Free 14-day trial. No credit card. No contract. Cancel anytime.</p>
+    
+    <div class="lead-form">
+        <form id="leadForm" action="#" method="POST">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="text" name="business" placeholder="Business Name" required>
+            <input type="tel" name="phone" placeholder="Business Phone Number" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <select name="trade" required>
+                <option value="" disabled selected>What trade are you in?</option>
+                <option value="hvac">HVAC / Air Conditioning</option>
+                <option value="plumbing">Plumbing</option>
+                <option value="electrical">Electrical</option>
+                <option value="landscaping">Landscaping</option>
+                <option value="pool">Pool Service</option>
+                <option value="cleaning">Cleaning Services</option>
+                <option value="pest">Pest Control</option>
+                <option value="roofing">Roofing</option>
+                <option value="general">General Contractor</option>
+                <option value="other">Other</option>
+            </select>
+            <button type="submit" class="cta-btn" style="width: 100%; text-align: center;">Start My Free Trial →</button>
+        </form>
+        <p class="cta-sub">Join 200+ Vegas contractors who never miss a call.</p>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 Jumpgate Industries — Las Vegas, Nevada — <a href="mailto:kurtis@jumpgateindustries.com" style="color: rgba(255,255,255,0.6);">kurtis@jumpgateindustries.com</a></p>
+    <p style="margin-top: 5px;">Built in Las Vegas, for Las Vegas contractors.</p>
+</footer>
+
+<!-- Meta Pixel Code (replace with actual pixel) -->
+<script>
+    // TODO: Add Meta Pixel
+    // !function(f,b,e,v,n,t,s){...}
+    
+    // Form submission handler
+    document.getElementById('leadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        // TODO: Send to your CRM/webhook
+        // fetch('https://your-api.com/leads', { method: 'POST', body: JSON.stringify(data) });
+        
+        // Thank you state
+        this.innerHTML = '<div style="text-align:center; padding: 20px;"><h3 style="color: #ffd700; margin-bottom: 10px;">🎉 You\'re In!</h3><p>We\'ll call you within 24 hours to set up your AI receptionist. Check your email for next steps.</p></div>';
+        
+        // Track conversion
+        // fbq('track', 'Lead', { content_name: data.trade });
+    });
+</script>
+
+</body>
+</html>
