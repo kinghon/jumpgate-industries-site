@@ -201,13 +201,51 @@
         .why-item h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
         .why-item p { color: var(--text-secondary); font-size: .95rem; }
 
-        /* ── CTA Banner ── */
-        .cta-banner {
-            padding: 80px 0; text-align: center;
-            background: radial-gradient(ellipse at 50% 100%, rgba(0,232,123,.1) 0%, transparent 60%);
+        /* ── Contact Form ── */
+        .contact { padding: 100px 0; background: var(--bg-secondary); }
+        .contact-wrap {
+            max-width: 640px; margin: 0 auto;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 48px 40px;
         }
-        .cta-banner h2 { font-size: 2.25rem; font-weight: 800; margin-bottom: 16px; }
-        .cta-banner p { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 32px; }
+        .contact-wrap h2 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; text-align: center; }
+        .contact-wrap .section-sub { margin-bottom: 32px; text-align: center; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 16px; }
+        .form-group label {
+            font-size: .8rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: .06em; color: var(--text-secondary); margin-bottom: 6px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 12px 16px;
+            color: var(--text-primary); font-size: .95rem; font-family: inherit;
+            transition: border-color .2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--accent);
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group select { cursor: pointer; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center;
+        }
+        .form-submit {
+            width: 100%; padding: 16px; border: none; border-radius: var(--radius-sm);
+            background: var(--accent); color: var(--bg-primary);
+            font-size: 1.05rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: transform .2s, box-shadow .2s;
+            margin-top: 8px;
+        }
+        .form-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,232,123,.25);
+        }
+        .form-note { text-align: center; color: var(--text-secondary); font-size: .8rem; margin-top: 16px; }
+        @media (max-width: 480px) {
+            .form-row { grid-template-columns: 1fr; }
+            .contact-wrap { padding: 32px 20px; }
+        }
 
         /* ── Footer ── */
         footer {
@@ -249,7 +287,7 @@
             <li><a href="#services">Services</a></li>
             <li><a href="#why">Why Us</a></li>
             <li><a href="#contact">Contact</a></li>
-            <li><a href="mailto:hello@jumpgateindustries.com" class="nav-cta">Contact Us</a></li>
+            <li><a href="#contact" class="nav-cta">Get Started</a></li>
         </ul>
     </div>
 </header>
@@ -337,12 +375,59 @@
     </div>
 </section>
 
-<!-- CTA -->
-<section class="cta-banner" id="contact">
+<!-- Contact Form -->
+<section class="contact" id="contact">
     <div class="container">
-        <h2>Ready to Stop Losing Money?</h2>
-        <p>14-day free trial on every service. No credit card. No contracts.</p>
-        <a href="mailto:hello@jumpgateindustries.com" class="hero-cta">✉️ Get in Touch</a>
+        <div class="contact-wrap">
+            <h2>Get Started Free</h2>
+            <p class="section-sub">14-day trial. No credit card. No contracts.</p>
+            <form action="https://formsubmit.co/hello@jumpgateindustries.com" method="POST">
+                <!-- FormSubmit config -->
+                <input type="hidden" name="_subject" value="New Jumpgate Inquiry">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_next" value="https://jumpgateindustries.com/?thanks=1">
+                <input type="text" name="_honey" style="display:none">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="John Smith" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company" name="company" placeholder="Smith Plumbing">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone <span style="opacity:.5">(optional)</span></label>
+                        <input type="tel" id="phone" name="phone" placeholder="(702) 555-1234">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="service">Service interested in</label>
+                    <select id="service" name="service">
+                        <option value="">Not sure yet — tell me everything</option>
+                        <option value="NeverMiss AI">NeverMiss AI — Phone Answering</option>
+                        <option value="ShowUp AI">ShowUp AI — No-Show Prevention</option>
+                        <option value="QuickQuote AI">QuickQuote AI — Estimates</option>
+                        <option value="CollectMore AI">CollectMore AI — Collections</option>
+                        <option value="ReviewBoost AI">ReviewBoost AI — Reviews</option>
+                        <option value="Multiple">Multiple services</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message">Anything else? <span style="opacity:.5">(optional)</span></label>
+                    <textarea id="message" name="message" placeholder="Tell us about your business, how many trucks you run, biggest headache right now..."></textarea>
+                </div>
+                <button type="submit" class="form-submit">Start My Free Trial →</button>
+                <p class="form-note">We'll get back to you within a few hours. Usually faster.</p>
+            </form>
+        </div>
     </div>
 </section>
 
