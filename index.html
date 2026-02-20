@@ -3,663 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stop Missing Calls. Start Booking Jobs. | Jumpgate Industries</title>
-    <meta name="description" content="AI phone answering for Las Vegas contractors. Never miss a lead again. Free 14-day trial.">
-    <!-- Meta Pixel -->
-    <meta name="facebook-domain-verification" content="REPLACE_WITH_VERIFICATION_CODE" />
+    <title>Jumpgate Industries — AI Tools for Blue Collar Businesses</title>
+    <meta name="description" content="AI-powered tools that answer your phones, prevent no-shows, generate estimates, collect payments, and build your reputation. Built for contractors in Las Vegas.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0b0f1a;
+            --bg-secondary: #131829;
+            --bg-card: #1a1f35;
+            --accent: #00e87b;
+            --accent-blue: #3b82f6;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #1e293b;
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a2e; line-height: 1.6; }
-        
-        /* Hero */
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── Header ── */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            background: rgba(11,15,26,.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        header .container {
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+        }
+        .logo {
+            font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em;
+            color: var(--accent);
+        }
+        .logo span { color: var(--text-primary); }
+        .nav-links { display: flex; list-style: none; gap: 8px; }
+        .nav-links a {
+            color: var(--text-secondary); text-decoration: none; font-size: .875rem;
+            font-weight: 500; padding: 6px 14px; border-radius: 8px;
+            transition: color .2s, background .2s;
+        }
+        .nav-links a:hover { color: var(--text-primary); background: rgba(255,255,255,.06); }
+        .nav-cta {
+            background: var(--accent) !important; color: var(--bg-primary) !important;
+            font-weight: 600 !important;
+        }
+        .nav-cta:hover { opacity: .9; }
+        .mobile-toggle { display: none; background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer; }
+
+        /* ── Hero ── */
         .hero {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: white;
-            padding: 60px 20px;
+            padding: 140px 0 100px;
             text-align: center;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0,232,123,.08) 0%, transparent 60%);
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(0,232,123,.1); border: 1px solid rgba(0,232,123,.2);
+            padding: 6px 16px; border-radius: 100px; font-size: .8rem;
+            font-weight: 600; color: var(--accent); margin-bottom: 24px;
         }
         .hero h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            max-width: 700px;
-            margin: 0 auto 20px;
-            line-height: 1.2;
-        }
-        .hero .subtitle {
-            font-size: 1.25rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto 30px;
-        }
-        .hero .stat-row {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-        .hero .stat {
-            text-align: center;
-        }
-        .hero .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #ffd700;
-        }
-        .hero .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        /* CTA Button */
-        .cta-btn {
-            display: inline-block;
-            background: #ffd700;
-            color: #1a1a2e;
-            padding: 18px 40px;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: none;
-            cursor: pointer;
-        }
-        .cta-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
-        }
-        .cta-sub {
-            font-size: 0.85rem;
-            opacity: 0.7;
-            margin-top: 10px;
-        }
-        
-        /* Problem Section */
-        .problem {
-            padding: 60px 20px;
-            background: #f8f9fa;
-        }
-        .problem .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .problem h2 {
-            font-size: 2rem;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .problem-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
+            font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+            font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            border-left: 4px solid #e74c3c;
         }
-        .problem-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            color: #e74c3c;
-        }
-        .problem-card p {
-            color: #555;
-        }
-        
-        /* How It Works */
-        .how-it-works {
-            padding: 60px 20px;
-        }
-        .how-it-works .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .how-it-works h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 40px;
-        }
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-        .step {
-            text-align: center;
-            padding: 30px;
-        }
-        .step-number {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #302b63, #24243e);
-            color: #ffd700;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin: 0 auto 15px;
-        }
-        .step h3 {
-            margin-bottom: 10px;
-        }
-        .step p {
-            color: #666;
-            font-size: 0.95rem;
-        }
-        
-        /* Math Section */
-        .math {
-            background: #1a1a2e;
-            color: white;
-            padding: 60px 20px;
-            text-align: center;
-        }
-        .math h2 {
-            font-size: 2rem;
-            margin-bottom: 30px;
-        }
-        .math-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            max-width: 800px;
-            margin: 0 auto 30px;
-        }
-        .math-card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 25px;
-        }
-        .math-card .number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #ffd700;
-        }
-        .math-card .label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-        .math .result {
-            font-size: 1.3rem;
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(255,215,0,0.15);
-            border-radius: 8px;
-            max-width: 600px;
-            margin: 20px auto;
-        }
-        
-        /* Features */
-        .features {
-            padding: 60px 20px;
-            background: #f8f9fa;
-        }
-        .features .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .features h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 40px;
-        }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-        }
-        .feature {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-        }
-        .feature .icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-        .feature h3 {
-            margin-bottom: 8px;
-        }
-        .feature p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        /* Testimonials */
-        .testimonials {
-            padding: 60px 20px;
-        }
-        .testimonials .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .testimonials h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 30px;
-        }
-        .testimonial {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 20px;
-            border-left: 4px solid #ffd700;
-        }
-        .testimonial p {
-            font-style: italic;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-        .testimonial .author {
-            font-weight: 700;
+        .hero h1 em {
             font-style: normal;
-            color: #666;
+            background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        
-        /* FAQ */
-        .faq {
-            padding: 60px 20px;
-            background: #f8f9fa;
+        .hero p {
+            font-size: 1.2rem; color: var(--text-secondary);
+            max-width: 640px; margin: 0 auto 36px;
         }
-        .faq .container {
-            max-width: 700px;
-            margin: 0 auto;
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--accent); color: var(--bg-primary);
+            padding: 16px 32px; border-radius: 12px; font-size: 1.05rem;
+            font-weight: 700; text-decoration: none;
+            transition: transform .2s, box-shadow .2s;
         }
-        .faq h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 30px;
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,232,123,.25);
         }
-        .faq-item {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
+
+        /* ── Stats bar ── */
+        .stats-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+            padding: 40px 0;
         }
-        .faq-item h3 {
-            font-size: 1rem;
-            margin-bottom: 8px;
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; text-align: center;
         }
-        .faq-item p {
-            color: #666;
-            font-size: 0.95rem;
+        .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+        .stat-label { font-size: .875rem; color: var(--text-secondary); margin-top: 4px; }
+
+        /* ── Services (data-driven) ── */
+        .services { padding: 100px 0; }
+        .section-header { text-align: center; margin-bottom: 24px; }
+        .section-header h2 { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; }
+        .section-sub { text-align: center; color: var(--text-secondary); font-size: 1.05rem; max-width: 560px; margin: 0 auto 20px; }
+
+        /* Category filter pills */
+        .filter-bar {
+            display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 48px;
         }
-        
-        /* Final CTA */
-        .final-cta {
-            background: linear-gradient(135deg, #0f0c29, #302b63);
-            color: white;
-            padding: 60px 20px;
-            text-align: center;
+        .filter-pill {
+            padding: 7px 18px; border-radius: 100px; font-size: .85rem; font-weight: 600;
+            border: 1px solid var(--border); background: transparent; color: var(--text-secondary);
+            cursor: pointer; transition: all .2s;
         }
-        .final-cta h2 {
-            font-size: 2rem;
-            margin-bottom: 15px;
+        .filter-pill:hover { border-color: var(--accent); color: var(--text-primary); }
+        .filter-pill.active { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
+
+        /* Service cards grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
         }
-        .final-cta .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
+        .service-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            display: flex; flex-direction: column;
+            transition: transform .25s, box-shadow .25s, border-color .25s;
+            position: relative; overflow: hidden;
         }
-        
-        /* Form */
-        .lead-form {
-            max-width: 400px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 30px;
+        .service-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+            opacity: 0; transition: opacity .25s;
         }
-        .lead-form input, .lead-form select {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 1rem;
-            background: rgba(255,255,255,0.05);
-            color: white;
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,.35);
+            border-color: rgba(0,232,123,.3);
         }
-        .lead-form input::placeholder {
-            color: rgba(255,255,255,0.5);
+        .service-card:hover::before { opacity: 1; }
+        .card-icon { font-size: 2.25rem; margin-bottom: 16px; }
+        .card-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+        .card-tag {
+            display: inline-block; font-size: .7rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: .06em; color: var(--accent); margin-bottom: 14px;
         }
-        .lead-form select {
-            color: rgba(255,255,255,0.8);
+        .card-desc { color: var(--text-secondary); font-size: .95rem; line-height: 1.65; flex: 1; margin-bottom: 20px; }
+        .card-price { font-size: 1.1rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 20px; }
+        .card-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--accent); font-weight: 600; font-size: .9rem;
+            text-decoration: none; transition: gap .2s;
         }
-        .lead-form select option {
-            color: #1a1a2e;
+        .card-link:hover { gap: 10px; }
+        .card-link svg { width: 16px; height: 16px; }
+
+        /* Hidden by filter */
+        .service-card.hidden {
+            display: none;
         }
-        
-        /* Footer */
+
+        /* ── Pain Points ── */
+        .pain { padding: 100px 0; background: var(--bg-secondary); }
+        .pain h2 { text-align: center; font-size: 2.25rem; font-weight: 800; margin-bottom: 16px; }
+        .pain .section-sub { margin-bottom: 48px; }
+        .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 24px; }
+        .pain-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 32px;
+            border-left: 3px solid #ef4444;
+        }
+        .pain-card h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+        .pain-card p { color: var(--text-secondary); font-size: .9rem; font-style: italic; }
+
+        /* ── Why section ── */
+        .why { padding: 100px 0; }
+        .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 40px; margin-top: 48px; }
+        .why-item { text-align: center; }
+        .why-icon { font-size: 2.5rem; margin-bottom: 16px; }
+        .why-item h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+        .why-item p { color: var(--text-secondary); font-size: .95rem; }
+
+        /* ── CTA Banner ── */
+        .cta-banner {
+            padding: 80px 0; text-align: center;
+            background: radial-gradient(ellipse at 50% 100%, rgba(0,232,123,.1) 0%, transparent 60%);
+        }
+        .cta-banner h2 { font-size: 2.25rem; font-weight: 800; margin-bottom: 16px; }
+        .cta-banner p { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 32px; }
+
+        /* ── Footer ── */
         footer {
-            background: #0a0a1a;
-            color: rgba(255,255,255,0.5);
-            padding: 30px 20px;
-            text-align: center;
-            font-size: 0.85rem;
+            border-top: 1px solid var(--border); padding: 60px 0 32px;
         }
-        
-        @media (max-width: 600px) {
-            .hero h1 { font-size: 1.8rem; }
-            .hero .stat-row { gap: 20px; }
-            .hero .stat-number { font-size: 1.8rem; }
+        .footer-grid {
+            display: grid; grid-template-columns: 2fr repeat(3,1fr);
+            gap: 40px; margin-bottom: 40px;
+        }
+        .footer-brand p { color: var(--text-secondary); font-size: .9rem; margin-top: 12px; max-width: 280px; }
+        .footer-col h4 { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-secondary); margin-bottom: 16px; }
+        .footer-col a { display: block; color: var(--text-secondary); text-decoration: none; font-size: .9rem; margin-bottom: 10px; transition: color .2s; }
+        .footer-col a:hover { color: var(--accent); }
+        .footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; text-align: center; color: var(--text-secondary); font-size: .8rem; }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 64px; left: 0; right: 0; background: var(--bg-secondary); padding: 16px; border-bottom: 1px solid var(--border); }
+            .nav-links.open { display: flex; }
+            .mobile-toggle { display: block; }
+            .stats-grid { grid-template-columns: repeat(2,1fr); }
+            .services-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
+<!-- Header -->
+<header>
+    <div class="container">
+        <div class="logo"><span>Jumpgate</span> Industries</div>
+        <button class="mobile-toggle" onclick="document.getElementById('nav').classList.toggle('open')" aria-label="Menu">☰</button>
+        <ul class="nav-links" id="nav">
+            <li><a href="#services">Services</a></li>
+            <li><a href="#why">Why Us</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="tel:+17252288822" class="nav-cta">Call Us</a></li>
+        </ul>
+    </div>
+</header>
+
 <!-- Hero -->
 <section class="hero">
-    <h1>Stop Missing Calls.<br>Start Booking Jobs.</h1>
-    <p class="subtitle">AI phone answering built for Las Vegas contractors. Every call answered. Every lead captured. Even at 2AM.</p>
-    
-    <div class="stat-row">
-        <div class="stat">
-            <div class="stat-number">5+</div>
-            <div class="stat-label">Calls missed per day<br>by the avg contractor</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">$200</div>
-            <div class="stat-label">Cost per HVAC lead<br>on Google Ads</div>
-        </div>
-        <div class="stat">
-            <div class="stat-number">80%</div>
-            <div class="stat-label">Of callers won't<br>leave a voicemail</div>
-        </div>
+    <div class="container">
+        <div class="hero-badge">⚡ AI built for the trades</div>
+        <h1>Your Business Runs.<br><em>We Handle the Rest.</em></h1>
+        <p>AI tools that answer calls, book jobs, chase payments, and grow your reputation — so you can focus on the work that pays.</p>
+        <a href="#services" class="hero-cta">See All Services →</a>
     </div>
-    
-    <a href="#start" class="cta-btn">Try Free for 14 Days →</a>
-    <p class="cta-sub">No credit card. No contract. Setup in 5 minutes.</p>
 </section>
 
-<!-- Problem -->
-<section class="problem">
+<!-- Stats -->
+<section class="stats-bar">
+    <div class="container">
+        <div class="stats-grid">
+            <div><div class="stat-num">$5K</div><div class="stat-label">Avg job lost per missed call</div></div>
+            <div><div class="stat-num">40%</div><div class="stat-label">Industry no-show rate</div></div>
+            <div><div class="stat-num">15 hrs</div><div class="stat-label">Weekly time wasted on quotes</div></div>
+            <div><div class="stat-num">90 days</div><div class="stat-label">Avg collection time</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- Services — rendered by JS from data -->
+<section class="services" id="services">
+    <div class="container">
+        <div class="section-header"><h2>Our AI Services</h2></div>
+        <p class="section-sub">Start with one. Add more as you grow. Each tool solves a specific pain point — no bloated bundles.</p>
+        <div class="filter-bar" id="filterBar"></div>
+        <div class="services-grid" id="servicesGrid"></div>
+    </div>
+</section>
+
+<!-- Pain Points -->
+<section class="pain">
     <div class="container">
         <h2>Sound Familiar?</h2>
-        
-        <div class="problem-card">
-            <h3>📱 "I can't answer the phone while I'm on a job"</h3>
-            <p>You're up a ladder, under a sink, or elbow-deep in a condenser unit. The phone rings. By the time you get to it, they've already called the next guy on Google.</p>
-        </div>
-        
-        <div class="problem-card">
-            <h3>🌙 "After-hours emergencies go to voicemail"</h3>
-            <p>In Vegas, AC emergencies happen after 6PM when it's 115°. Your phone goes to voicemail. They call someone else. You wake up to a missed $4,000 emergency call.</p>
-        </div>
-        
-        <div class="problem-card">
-            <h3>💸 "I'm buying leads I can't even answer"</h3>
-            <p>You're spending $500-$2,000/month on Google Ads, Angie's List, and HomeAdvisor — then missing the calls those ads generate. That's not marketing. That's burning money.</p>
-        </div>
-        
-        <div class="problem-card">
-            <h3>👨‍👩‍👧 "My wife is my receptionist (and she's over it)"</h3>
-            <p>Be honest: is your spouse answering your business phone? Taking messages on sticky notes? That's not a business plan. That's a cry for help.</p>
+        <p class="section-sub">Real problems from real contractors across Las Vegas.</p>
+        <div class="pain-grid">
+            <div class="pain-card">
+                <h4>📞 Missed the Big One</h4>
+                <p>"Lost an $8,000 HVAC job because I was in a crawl space. They called someone who answered."</p>
+            </div>
+            <div class="pain-card">
+                <h4>🚗 Wasted Drive</h4>
+                <p>"Drove 45 minutes. Customer wasn't home. No answer when I called. Happens 3-4 times a week."</p>
+            </div>
+            <div class="pain-card">
+                <h4>💸 Chasing Money</h4>
+                <p>"$15K in unpaid invoices. Hours every week calling people who dodge my calls."</p>
+            </div>
+            <div class="pain-card">
+                <h4>⏰ Estimate Hell</h4>
+                <p>"12 hours this week on estimates that went nowhere. That's paying work I didn't do."</p>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- How It Works -->
-<section class="how-it-works">
+<!-- Why -->
+<section class="why" id="why">
     <div class="container">
-        <h2>How It Works (5 Minutes to Set Up)</h2>
-        
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <h3>Connect Your Number</h3>
-                <p>Forward your calls or get a new local Vegas number. Takes 2 minutes. No hardware needed.</p>
+        <div class="section-header"><h2>Why Jumpgate?</h2></div>
+        <p class="section-sub">We're not generic SaaS. We build for the trades.</p>
+        <div class="why-grid">
+            <div class="why-item">
+                <div class="why-icon">🔧</div>
+                <h3>Built for Contractors</h3>
+                <p>HVAC, plumbing, electrical, general — every feature designed for how you actually work.</p>
             </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <h3>AI Answers Every Call</h3>
-                <p>Sounds human. Knows your services, hours, and service area. Answers questions, captures details, books appointments.</p>
+            <div class="why-item">
+                <div class="why-icon">🏜️</div>
+                <h3>Las Vegas Local</h3>
+                <p>We know Vegas seasons, summer emergency calls, and the local contractor community.</p>
             </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <h3>You Get a Text</h3>
-                <p>Instant summary of every call: who called, what they need, when they're available, and urgency level. Appointments already on your calendar.</p>
+            <div class="why-item">
+                <div class="why-icon">⚡</div>
+                <h3>Live in 24 Hours</h3>
+                <p>No complex setup. No IT department. Sign up today, working tomorrow.</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Math -->
-<section class="math">
-    <h2>The Math Is Simple</h2>
-    
-    <div class="math-grid">
-        <div class="math-card">
-            <div class="number">5</div>
-            <div class="label">Missed calls per day</div>
-        </div>
-        <div class="math-card">
-            <div class="number">$800</div>
-            <div class="label">Average job value</div>
-        </div>
-        <div class="math-card">
-            <div class="number">20%</div>
-            <div class="label">Close rate on answered calls</div>
-        </div>
-    </div>
-    
-    <div class="result">
-        <strong>That's $800/day in captured revenue</strong> — or <strong>$24,000/month</strong> — from calls you're currently missing. Even 1 extra booking per week pays for this 10x over.
-    </div>
-    
-    <a href="#start" class="cta-btn" style="margin-top: 20px;">Start Capturing Those Calls →</a>
-</section>
-
-<!-- Features -->
-<section class="features">
+<!-- CTA -->
+<section class="cta-banner" id="contact">
     <div class="container">
-        <h2>Built for Contractors. Not Corporate.</h2>
-        
-        <div class="feature-grid">
-            <div class="feature">
-                <div class="icon">📞</div>
-                <h3>24/7 Call Answering</h3>
-                <p>Every call answered in under 1 second. Weekends, holidays, 2AM emergencies. Always on.</p>
-            </div>
-            <div class="feature">
-                <div class="icon">📅</div>
-                <h3>Auto Scheduling</h3>
-                <p>Books appointments directly into your calendar. Sends confirmation texts to the customer.</p>
-            </div>
-            <div class="feature">
-                <div class="icon">📲</div>
-                <h3>Missed Call Text-Back</h3>
-                <p>If a call slips through, an instant text goes out: "Hey, we saw your call. How can we help?"</p>
-            </div>
-            <div class="feature">
-                <div class="icon">⭐</div>
-                <h3>Review Collection</h3>
-                <p>Automatic review requests after every job. Build your Google rating on autopilot.</p>
-            </div>
-            <div class="feature">
-                <div class="icon">🚨</div>
-                <h3>Emergency Routing</h3>
-                <p>AI detects urgent calls (AC out, pipe burst) and calls you directly. Non-urgent ones get scheduled.</p>
-            </div>
-            <div class="feature">
-                <div class="icon">📊</div>
-                <h3>Call Analytics</h3>
-                <p>See every call, booking, and missed opportunity. Know exactly what's working and what's not.</p>
-            </div>
-        </div>
+        <h2>Ready to Stop Losing Money?</h2>
+        <p>14-day free trial on every service. No credit card. No contracts.</p>
+        <a href="tel:+17252288822" class="hero-cta">📞 (725) 228-8822</a>
     </div>
 </section>
 
-<!-- Testimonials -->
-<section class="testimonials">
-    <div class="container">
-        <h2>What Contractors Are Saying</h2>
-        
-        <div class="testimonial">
-            <p>"We were missing 30+ calls a month during summer. Now we catch every one. Revenue went up 40% in 90 days and we didn't hire a single person."</p>
-            <span class="author">— HVAC Contractor</span>
-        </div>
-        
-        <div class="testimonial">
-            <p>"I used to spend every evening doing quotes and follow-ups. Now I'm home by 6. My family thinks I'm a different person."</p>
-            <span class="author">— Electrical Contractor</span>
-        </div>
-        
-        <div class="testimonial">
-            <p>"The AI sounds so natural that customers don't even realize they're not talking to a person. It books the appointment, texts them a confirmation, and I just show up."</p>
-            <span class="author">— Plumbing Contractor</span>
-        </div>
-    </div>
-</section>
-
-<!-- FAQ -->
-<section class="faq">
-    <div class="container">
-        <h2>Questions? We Got You.</h2>
-        
-        <div class="faq-item">
-            <h3>Does the AI actually sound human?</h3>
-            <p>Yes. We use the latest voice AI — customers consistently can't tell the difference. It speaks naturally, handles interruptions, and understands context.</p>
-        </div>
-        
-        <div class="faq-item">
-            <h3>What if someone needs to reach me urgently?</h3>
-            <p>The AI detects emergency language (pipe burst, no AC, electrical hazard) and immediately calls or texts you directly. You set the rules for what counts as urgent.</p>
-        </div>
-        
-        <div class="faq-item">
-            <h3>How long does setup take?</h3>
-            <p>5 minutes. Seriously. Forward your number, tell us your services and hours, and you're live. No apps to install. No hardware needed.</p>
-        </div>
-        
-        <div class="faq-item">
-            <h3>What does it cost?</h3>
-            <p>Less than one missed job per month. Way less than a receptionist. Start with a free 14-day trial — no credit card required.</p>
-        </div>
-        
-        <div class="faq-item">
-            <h3>What trades do you work with?</h3>
-            <p>HVAC, plumbing, electrical, landscaping, pool service, pest control, roofing, cleaning services, general contractors — any service business that relies on phone calls.</p>
-        </div>
-        
-        <div class="faq-item">
-            <h3>Can I keep my existing phone number?</h3>
-            <p>Absolutely. We work with your existing number through simple call forwarding. Your customers won't notice any change.</p>
-        </div>
-    </div>
-</section>
-
-<!-- Services -->
-<section class="features">
-    <div class="container">
-        <h2>Our Complete Service Suite</h2>
-        <p style="text-align: center; font-size: 1.1rem; margin-bottom: 40px; color: #666;">Choose the AI tools that fit your business. Mix and match for maximum impact.</p>
-        
-        <div class="feature-grid">
-            <div class="feature">
-                <div class="icon">📞</div>
-                <h3><a href="missed-calls/" style="color: #1a1a2e; text-decoration: none;">AI Phone Answering</a></h3>
-                <p>Never miss another call. AI answers 24/7, books appointments, routes emergencies. <strong>$297/month</strong></p>
-                <a href="missed-calls/" style="color: #302b63; font-weight: 600; font-size: 0.9rem;">Learn More →</a>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">📝</div>
-                <h3><a href="smart-estimates/" style="color: #1a1a2e; text-decoration: none;">AI Estimate Generator</a></h3>
-                <p>Professional estimates in minutes, not hours. Voice or text input, auto-follow-up. <strong>$197/month</strong></p>
-                <a href="smart-estimates/" style="color: #302b63; font-weight: 600; font-size: 0.9rem;">Learn More →</a>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">⭐</div>
-                <h3><a href="reviews/" style="color: #1a1a2e; text-decoration: none;">Review Automation</a></h3>
-                <p>Build your 5-star reputation on autopilot. Smart timing, auto-responses. <strong>$149/month</strong></p>
-                <a href="reviews/" style="color: #302b63; font-weight: 600; font-size: 0.9rem;">Learn More →</a>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">📅</div>
-                <h3><a href="no-shows/" style="color: #1a1a2e; text-decoration: none;">No-Show Prevention</a></h3>
-                <p>Appointment reminders that actually work. Cut no-shows in half. <strong>$149/month</strong></p>
-                <a href="no-shows/" style="color: #302b63; font-weight: 600; font-size: 0.9rem;">Learn More →</a>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">💰</div>
-                <h3><a href="collections/" style="color: #1a1a2e; text-decoration: none;">AI Collections</a></h3>
-                <p>Get paid faster with automated invoice follow-up. Professional but persistent. <strong>$197/month</strong></p>
-                <a href="collections/" style="color: #302b63; font-weight: 600; font-size: 0.9rem;">Learn More →</a>
-            </div>
-            
-            <div class="feature">
-                <div class="icon">🎯</div>
-                <h3>Complete Bundle</h3>
-                <p>All 5 AI services working together. Full automation for lead capture to payment collection. <strong>$897/month value for $697/month</strong></p>
-                <a href="#start" style="color: #302b63; font-weight: 600; font-size: 0.9rem;">Get Bundle Pricing →</a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Final CTA -->
-<section class="final-cta" id="start">
-    <h2>Ready to Stop Missing Calls?</h2>
-    <p class="subtitle">Free 14-day trial. No credit card. No contract. Cancel anytime.</p>
-    
-    <div class="lead-form">
-        <form id="leadForm" action="#" method="POST">
-            <input type="text" name="name" placeholder="Your Name" required>
-            <input type="text" name="business" placeholder="Business Name" required>
-            <input type="tel" name="phone" placeholder="Business Phone Number" required>
-            <input type="email" name="email" placeholder="Email Address" required>
-            <select name="trade" required>
-                <option value="" disabled selected>What trade are you in?</option>
-                <option value="hvac">HVAC / Air Conditioning</option>
-                <option value="plumbing">Plumbing</option>
-                <option value="electrical">Electrical</option>
-                <option value="landscaping">Landscaping</option>
-                <option value="pool">Pool Service</option>
-                <option value="cleaning">Cleaning Services</option>
-                <option value="pest">Pest Control</option>
-                <option value="roofing">Roofing</option>
-                <option value="general">General Contractor</option>
-                <option value="other">Other</option>
-            </select>
-            <button type="submit" class="cta-btn" style="width: 100%; text-align: center;">Start My Free Trial →</button>
-        </form>
-        <p class="cta-sub">Join 200+ Vegas contractors who never miss a call.</p>
-    </div>
-</section>
-
+<!-- Footer -->
 <footer>
-    <p>© 2026 Jumpgate Industries — Las Vegas, Nevada — <a href="mailto:kurtis@jumpgateindustries.com" style="color: rgba(255,255,255,0.6);">kurtis@jumpgateindustries.com</a></p>
-    <p style="margin-top: 5px;">Built in Las Vegas, for Las Vegas contractors.</p>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="logo"><span>Jumpgate</span> Industries</div>
+                <p>AI-powered tools for blue collar businesses. Las Vegas, Nevada.</p>
+            </div>
+            <div class="footer-col" id="footerServices">
+                <h4>Services</h4>
+                <!-- populated by JS -->
+            </div>
+            <div class="footer-col">
+                <h4>Industries</h4>
+                <a href="#">HVAC</a>
+                <a href="#">Plumbing</a>
+                <a href="#">Electrical</a>
+                <a href="#">General Contractors</a>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <a href="tel:+17252288822">(725) 228-8822</a>
+                <a href="mailto:hello@jumpgateindustries.com">hello@jumpgateindustries.com</a>
+                <a href="#">Las Vegas, NV</a>
+            </div>
+        </div>
+        <div class="footer-bottom">&copy; 2026 Jumpgate Industries. All rights reserved.</div>
+    </div>
 </footer>
 
-<!-- Meta Pixel Code (replace with actual pixel) -->
 <script>
-    // TODO: Add Meta Pixel
-    // !function(f,b,e,v,n,t,s){...}
-    
-    // Form submission handler
-    document.getElementById('leadForm').addEventListener('submit', function(e) {
+/**
+ * ═══════════════════════════════════════════════════
+ *  SERVICE REGISTRY — Add new services here.
+ *  That's it. The page builds itself.
+ * ═══════════════════════════════════════════════════
+ */
+const SERVICES = [
+    {
+        name: "NeverMiss AI",
+        slug: "missed-calls",
+        icon: "📞",
+        category: "Leads",
+        price: "$297/mo",
+        desc: "AI phone answering that captures every lead, books appointments, and handles customer calls 24/7. Never lose another $5,000 job to voicemail."
+    },
+    {
+        name: "ShowUp AI",
+        slug: "no-shows",
+        icon: "📅",
+        category: "Operations",
+        price: "$149/mo",
+        desc: "Automated appointment reminders via SMS and email. Cut no-shows by 70%+ and stop wasting time on empty drive-outs."
+    },
+    {
+        name: "QuickQuote AI",
+        slug: "smart-estimates",
+        icon: "📝",
+        category: "Leads",
+        price: "$197/mo",
+        desc: "Generate professional estimates in minutes with AI and industry pricing data. Reclaim 15+ hours a week from quotes that go nowhere."
+    },
+    {
+        name: "CollectMore AI",
+        slug: "collections",
+        icon: "💰",
+        category: "Revenue",
+        price: "$197/mo",
+        desc: "Automated payment reminders and collection follow-ups. Professional, persistent sequences that get you paid faster."
+    },
+    {
+        name: "ReviewBoost AI",
+        slug: "reviews",
+        icon: "⭐",
+        category: "Growth",
+        price: "$149/mo",
+        desc: "Automatically request and manage reviews on Google, Yelp, and Facebook. Build your reputation while you do the real work."
+    }
+];
+
+// ── Render ──
+const grid = document.getElementById('servicesGrid');
+const filterBar = document.getElementById('filterBar');
+const footerServices = document.getElementById('footerServices');
+
+// Build category list
+const categories = ['All', ...new Set(SERVICES.map(s => s.category))];
+
+// Filter pills
+categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-pill' + (cat === 'All' ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => {
+        document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.classList.toggle('hidden', cat !== 'All' && card.dataset.category !== cat);
+        });
+    };
+    filterBar.appendChild(btn);
+});
+
+// Service cards
+SERVICES.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'service-card';
+    card.dataset.category = s.category;
+    card.innerHTML = `
+        <div class="card-icon">${s.icon}</div>
+        <div class="card-name">${s.name}</div>
+        <div class="card-tag">${s.category}</div>
+        <div class="card-desc">${s.desc}</div>
+        <div class="card-price">${s.price}</div>
+        <a href="/${s.slug}/" class="card-link">Learn more <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    `;
+    grid.appendChild(card);
+});
+
+// Footer service links
+SERVICES.forEach(s => {
+    const a = document.createElement('a');
+    a.href = '/' + s.slug + '/';
+    a.textContent = s.name;
+    footerServices.appendChild(a);
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
         e.preventDefault();
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData);
-        
-        // TODO: Send to your CRM/webhook
-        // fetch('https://your-api.com/leads', { method: 'POST', body: JSON.stringify(data) });
-        
-        // Thank you state
-        this.innerHTML = '<div style="text-align:center; padding: 20px;"><h3 style="color: #ffd700; margin-bottom: 10px;">🎉 You\'re In!</h3><p>We\'ll call you within 24 hours to set up your AI receptionist. Check your email for next steps.</p></div>';
-        
-        // Track conversion
-        // fbq('track', 'Lead', { content_name: data.trade });
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // close mobile menu
+        document.getElementById('nav').classList.remove('open');
     });
+});
 </script>
 
 </body>
