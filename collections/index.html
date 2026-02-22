@@ -224,9 +224,45 @@
             color: var(--text-secondary); margin-top: 14px;
         }
 
+        
+        /* ── Book Demo Button ── */
+        .book-demo-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--accent);
+            color: #0b0f1a;
+            text-align: center;
+            padding: 10px 16px;
+            font-size: .9rem;
+            font-weight: 700;
+        }
+        .book-demo-bar a {
+            color: #0b0f1a;
+            text-decoration: none;
+        }
+        .book-demo-bar a:hover { opacity: .85; }
+        .hero-cta-row {
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+            margin-top: 24px;
+        }
+        .btn-book-demo {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-size: .95rem; font-weight: 700;
+            text-decoration: none;
+            transition: background .15s, color .15s;
+        }
+        .btn-book-demo:hover { background: var(--accent); color: #0b0f1a; }
+
         </style>
 </head>
 <body>
+<div class="book-demo-bar">📅 <a href="https://cal.com/jumpgateindustries/free-demo" target="_blank">Book a Free 30-Min Demo Call →</a></div>
 
 <header>
   <div class="container nav-inner">
