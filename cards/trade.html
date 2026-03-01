@@ -119,6 +119,7 @@
   .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.3rem}
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -130,30 +131,11 @@
 
   
   <div class="settings-bar">
-    <div class="settings-toggle" onclick="document.getElementById('settingsPanel').style.display=document.getElementById('settingsPanel').style.display==='none'?'block':'none'">⚙️ AI Card Scanner — Click to Set Up (Free)</div>
-    <div id="settingsPanel" style="display:none">
-      <div style="max-width:560px;margin:.75rem auto 0;background:#18181b;border:1px solid #27272a;border-radius:10px;padding:1rem;text-align:left">
-        <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
-          <button onclick="setProvider('gemini')" id="provGemini" style="flex:1;padding:.4rem;border-radius:6px;border:1px solid #22c55e;background:rgba(34,197,94,.1);color:#22c55e;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit">✨ Google Gemini (FREE)</button>
-          <button onclick="setProvider('openai')" id="provOpenai" style="flex:1;padding:.4rem;border-radius:6px;border:1px solid #27272a;background:transparent;color:#71717a;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit">OpenAI GPT-4o (Paid)</button>
-        </div>
-        <div id="geminiSetup">
-          <label style="font-size:.75rem;color:#a1a1aa;display:block;margin-bottom:.4rem">Google Gemini API Key <span style="color:#22c55e;font-weight:600">— 100% Free</span></label>
-          <div style="font-size:.7rem;color:#52525b;margin-bottom:.5rem;line-height:1.4">1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#3b82f6">aistudio.google.com/apikey</a> · 2. Sign in with Google · 3. Click "Create API Key" · 4. Paste below</div>
-          <div class="custom-add">
-            <input type="password" id="geminiKeyInput" placeholder="AIza..." style="flex:1">
-            <button onclick="saveApiKey()">Save</button>
-          </div>
-        </div>
-        <div id="openaiSetup" style="display:none">
-          <label style="font-size:.75rem;color:#a1a1aa;display:block;margin-bottom:.4rem">OpenAI API Key <span style="color:#52525b">(requires paid credits)</span></label>
-          <div class="custom-add">
-            <input type="password" id="apiKeyInput" placeholder="sk-..." style="flex:1">
-            <button onclick="saveApiKey()">Save</button>
-          </div>
-        </div>
-        <div id="keyStatus" style="font-size:.7rem;margin-top:.4rem"></div>
-      </div>
+    <div style="font-size:.75rem;color:#71717a;margin-bottom:.25rem">📸 Upload card photos → AI scans text → Matches against price database</div>
+    <div style="display:flex;gap:.5rem;justify-content:center;align-items:center;flex-wrap:wrap">
+      <span style="font-size:.65rem;padding:.2rem .6rem;border-radius:999px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#22c55e">✨ 100% Free</span>
+      <span style="font-size:.65rem;padding:.2rem .6rem;border-radius:999px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#3b82f6">🔒 Runs in browser</span>
+      <span style="font-size:.65rem;padding:.2rem .6rem;border-radius:999px;background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.2);color:#eab308">🚀 No setup needed</span>
     </div>
   </div>
 
@@ -493,25 +475,9 @@ function analyze(){
   document.getElementById('customPrice'+s).addEventListener('keydown',e=>{if(e.key==='Enter')addCustomCard(s)});
 });
 
-// ===== AI CARD SCANNING =====
-let aiProvider = localStorage.getItem('ai_provider') || 'gemini';
+// ===== CARD SCANNING (Client-side OCR — Zero Setup) =====
 const uploadedFiles = {A: [], B: []};
 
-function setProvider(p) {
-  aiProvider = p;
-  localStorage.setItem('ai_provider', p);
-  document.getElementById('geminiSetup').style.display = p === 'gemini' ? 'block' : 'none';
-  document.getElementById('openaiSetup').style.display = p === 'openai' ? 'block' : 'none';
-  document.getElementById('provGemini').style.borderColor = p === 'gemini' ? '#22c55e' : '#27272a';
-  document.getElementById('provGemini').style.background = p === 'gemini' ? 'rgba(34,197,94,.1)' : 'transparent';
-  document.getElementById('provGemini').style.color = p === 'gemini' ? '#22c55e' : '#71717a';
-  document.getElementById('provOpenai').style.borderColor = p === 'openai' ? '#3b82f6' : '#27272a';
-  document.getElementById('provOpenai').style.background = p === 'openai' ? 'rgba(59,130,246,.1)' : 'transparent';
-  document.getElementById('provOpenai').style.color = p === 'openai' ? '#3b82f6' : '#71717a';
-  updateScanButtons();
-}
-
-// Override handleFiles to store file references
 const origHandleFiles = handleFiles;
 handleFiles = function(files, side) {
   uploadedFiles[side] = Array.from(files);
@@ -526,181 +492,113 @@ clearImages = function(side, e) {
   updateScanButtons();
 };
 
-function getApiKey() {
-  if (aiProvider === 'gemini') return localStorage.getItem('gemini_api_key');
-  return localStorage.getItem('openai_api_key');
-}
-
 function updateScanButtons() {
   ['A','B'].forEach(s => {
     const btn = document.getElementById('scanBtn'+s);
-    const hasFiles = uploadedFiles[s].length > 0;
-    const hasKey = !!getApiKey();
-    btn.disabled = !(hasFiles && hasKey);
-    const status = document.getElementById('scanStatus'+s);
-    if (!hasKey && hasFiles) {
-      status.textContent = '⚠️ Set up your free API key above to enable scanning';
-      status.style.color = '#eab308';
-    } else if (hasFiles) {
-      status.textContent = '📸 ' + uploadedFiles[s].length + ' photo(s) ready to scan';
-      status.style.color = '#a1a1aa';
-    } else {
-      status.textContent = '';
-    }
+    btn.disabled = !uploadedFiles[s].length;
+    const st = document.getElementById('scanStatus'+s);
+    if (uploadedFiles[s].length) {
+      st.textContent = '\u{1F4F8} ' + uploadedFiles[s].length + ' photo(s) ready';
+      st.style.color = '#a1a1aa';
+    } else { st.textContent = ''; }
   });
 }
+updateScanButtons();
 
-function saveApiKey() {
-  const statusEl = document.getElementById('keyStatus');
-  if (aiProvider === 'gemini') {
-    const key = document.getElementById('geminiKeyInput').value.trim();
-    if (!key.startsWith('AIza')) {
-      statusEl.textContent = '❌ Gemini keys start with AIza...';
-      statusEl.style.color = '#ef4444'; return;
-    }
-    localStorage.setItem('gemini_api_key', key);
-  } else {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    if (!key.startsWith('sk-')) {
-      statusEl.textContent = '❌ OpenAI keys start with sk-...';
-      statusEl.style.color = '#ef4444'; return;
-    }
-    localStorage.setItem('openai_api_key', key);
-  }
-  statusEl.textContent = '✅ Key saved! You can now scan cards.';
-  statusEl.style.color = '#22c55e';
-  updateScanButtons();
+function fuzzyMatch(text) {
+  const lower = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
+  const words = lower.split(/\s+/).filter(w => w.length >= 3);
+  if (!words.length) return [];
+  return db.map(card => {
+    const ct = (card.name + ' ' + card.set).toLowerCase();
+    let score = 0;
+    const mw = [];
+    words.forEach(w => { if (ct.includes(w)) { score += w.length; mw.push(w); } });
+    if (mw.length >= 2) score *= 1.5;
+    if (mw.length >= 3) score *= 2;
+    return { card, score, mw };
+  }).filter(s => s.score > 8 && s.mw.length >= 2).sort((a, b) => b.score - a.score);
 }
 
-// Load saved state
-(function(){
-  setProvider(aiProvider);
-  const gk = localStorage.getItem('gemini_api_key');
-  const ok = localStorage.getItem('openai_api_key');
-  if (gk) document.getElementById('geminiKeyInput').value = gk;
-  if (ok) document.getElementById('apiKeyInput').value = ok;
-  if (gk || ok) {
-    document.getElementById('keyStatus').textContent = '✅ Key loaded from browser';
-    document.getElementById('keyStatus').style.color = '#22c55e';
-  }
-  updateScanButtons();
-})();
-
-async function fileToBase64(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.readAsDataURL(file);
-  });
-}
-
-const CARD_PROMPT = `Identify every trading card visible in these images. For each card, provide:
-1. The card name (player/character name + card type/variant)
-2. The set it's from
-3. The category: basketball, football, baseball, or pokemon
-4. Your estimated market value in USD based on recent eBay sold prices
-
-Respond ONLY with a JSON array, no other text:
-[{"name": "Card Name", "set": "Set Name", "cat": "basketball|football|baseball|pokemon", "price": 123}]
-
-Be specific with card variants (Silver Prizm, Chrome Refractor, SIR, SAR, etc). Factor in visible condition/grading.`;
-
-async function scanWithGemini(images, apiKey) {
-  const parts = [{ text: CARD_PROMPT }];
-  for (const img of images) {
-    parts.push({ inline_data: { mime_type: img.mime, data: img.b64 } });
-  }
-  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: [{ parts }], generationConfig: { temperature: 0.1 } })
-  });
-  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'Gemini API error'); }
-  const data = await res.json();
-  return data.candidates[0].content.parts[0].text;
-}
-
-async function scanWithOpenAI(images, apiKey) {
-  const content = [{ type: 'text', text: CARD_PROMPT }];
-  for (const img of images) {
-    content.push({ type: 'image_url', image_url: { url: 'data:' + img.mime + ';base64,' + img.b64, detail: 'high' } });
-  }
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-    body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'user', content }], max_tokens: 2000, temperature: 0.1 })
-  });
-  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'OpenAI API error'); }
-  const data = await res.json();
-  return data.choices[0].message.content;
+function parseKeywords(text) {
+  const kw = [
+    'flagg','wembanyama','wemby','jordan','lebron','curry','luka','kobe','edwards','giannis',
+    'mahomes','allen','burrow','williams','daniels','bowers','sanders','lawrence','hurts','brady',
+    'ohtani','skenes','trout','griffey','mantle','witt','henderson','anthony','knueppel','harper',
+    'charizard','pikachu','umbreon','mewtwo','mew','eevee','sylveon','espeon',
+    'leafeon','glaceon','vaporeon','flareon','jolteon','ceruledge',
+    'prizm','topps','chrome','bowman','panini','mosaic','fleer','upper deck',
+    'prismatic','evolutions','evolving','skies','surging','sparks','obsidian','phantasmal',
+    'rookie','auto','refractor','silver','holo','psa','bgs',
+    'sir','sar','vmax','alt art','special','illustration'
+  ];
+  const lower = text.toLowerCase();
+  return kw.filter(k => lower.includes(k));
 }
 
 async function scanCards(side) {
-  const apiKey = getApiKey();
-  if (!apiKey) { alert('Set up your API key first!'); return; }
   const files = uploadedFiles[side];
-  if (!files.length) { alert('Upload photos first!'); return; }
+  if (!files.length) return;
 
   const btn = document.getElementById('scanBtn'+side);
-  const status = document.getElementById('scanStatus'+side);
+  const st = document.getElementById('scanStatus'+side);
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Scanning...';
-  const provName = aiProvider === 'gemini' ? 'Gemini Flash' : 'GPT-4o Vision';
-  status.textContent = '🔍 Analyzing with ' + provName + '...';
-  status.style.color = '#8b5cf6';
+  st.textContent = '\u{1F50D} Reading card text (10-20 sec)...';
+  st.style.color = '#8b5cf6';
 
   try {
-    const images = [];
-    for (const file of files) {
-      const b64 = await fileToBase64(file);
-      images.push({ b64, mime: file.type || 'image/jpeg' });
-    }
-
-    let rawText;
-    if (aiProvider === 'gemini') {
-      rawText = await scanWithGemini(images, apiKey);
-    } else {
-      rawText = await scanWithOpenAI(images, apiKey);
-    }
-
-    // Parse JSON from response
-    let jsonStr = rawText.trim();
-    const jsonMatch = jsonStr.match(/\[\s*\{[\s\S]*\}\s*\]/);
-    if (jsonMatch) jsonStr = jsonMatch[0];
-    const identified = JSON.parse(jsonStr);
-
-    if (!identified.length) {
-      status.textContent = '⚠️ No cards identified. Try clearer photos.';
-      status.style.color = '#eab308';
-      btn.innerHTML = '🤖 Scan Photos with AI';
-      btn.disabled = false; return;
-    }
-
-    identified.forEach(card => {
-      // Try fuzzy match to database
-      const nameLower = (card.name || '').toLowerCase();
-      const match = db.find(d => {
-        const dLower = d.name.toLowerCase();
-        const words = nameLower.split(/\s+/);
-        const matchCount = words.filter(w => w.length > 3 && dLower.includes(w)).length;
-        return matchCount >= 2 && d.cat === card.cat;
+    let allText = '';
+    for (let i = 0; i < files.length; i++) {
+      st.textContent = '\u{1F50D} Scanning photo ' + (i+1) + '/' + files.length + '...';
+      const r = await Tesseract.recognize(files[i], 'eng', {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            st.textContent = '\u{1F50D} Photo ' + (i+1) + '/' + files.length + ': ' + Math.round((m.progress||0)*100) + '%';
+          }
+        }
       });
-      if (match) {
-        sideCards[side].push({name: match.name, set: match.set, price: match.price, cat: match.cat});
-      } else {
-        sideCards[side].push({name: card.name, set: card.set || 'AI Identified', price: Math.round(card.price) || 0, cat: card.cat || 'custom'});
-      }
-    });
+      allText += ' ' + r.data.text;
+    }
 
-    renderList(side);
-    status.textContent = '✅ Found ' + identified.length + ' card(s)! Review and adjust if needed.';
-    status.style.color = '#22c55e';
-  } catch (err) {
-    console.error('Scan error:', err);
-    status.textContent = '❌ ' + err.message;
-    status.style.color = '#ef4444';
+    st.textContent = '\u{1F9E0} Matching against database...';
+    const kws = parseKeywords(allText);
+    const matches = fuzzyMatch(allText);
+
+    // Also match just keywords
+    if (kws.length) {
+      fuzzyMatch(kws.join(' ')).forEach(m => {
+        if (!matches.find(e => e.card.name === m.card.name)) matches.push(m);
+      });
+    }
+
+    if (matches.length) {
+      const added = new Set();
+      let n = 0;
+      matches.forEach(m => {
+        if (!added.has(m.card.name) && n < 10) {
+          sideCards[side].push({name:m.card.name, set:m.card.set, price:m.card.price, cat:m.card.cat});
+          added.add(m.card.name); n++;
+        }
+      });
+      renderList(side);
+      st.innerHTML = '\u2705 Found ' + n + ' card(s)! Review below and remove any wrong matches.';
+      st.style.color = '#22c55e';
+    } else {
+      const clean = allText.replace(/[\n\r]+/g,' ').replace(/\s+/g,' ').trim().substring(0,150);
+      st.innerHTML = '\u26A0\uFE0F Couldn\'t auto-match. Detected: <em style="color:#71717a">"' +
+        (clean||'no text') + '"</em><br>Search manually below, or try a clearer photo.';
+      st.style.color = '#eab308';
+      if (kws.length) {
+        document.getElementById('search'+side).value = kws[0];
+        document.getElementById('search'+side).dispatchEvent(new Event('input'));
+      }
+    }
+  } catch(e) {
+    st.textContent = '\u274C ' + (e.message||'Scan failed');
+    st.style.color = '#ef4444';
   }
-  btn.innerHTML = '🤖 Scan Photos with AI';
+  btn.innerHTML = '\u{1F916} Scan Photos with AI';
   btn.disabled = false;
   updateScanButtons();
 }
