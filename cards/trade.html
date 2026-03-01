@@ -443,32 +443,39 @@ function clearImages(side,e){
 function addCard(side,idx,q){
   const results=document.getElementById('results'+side);
   const card=results._matches[idx];
-  // Ask if card is graded
-  const grade = prompt('Is this card graded? Enter grade or leave blank for raw:\n\nOptions: PSA 10, PSA 9, PSA 8, PSA 7, BGS 10, BGS 9.5, BGS 9, CGC 10, CGC 9.5, CGC 9');
-  let gradeKey = 'raw';
+  // Check if scanner already detected a grade
+  let gradeKey = window['_detectedGrade_' + side] || 'raw';
   let price = card.price;
-  if (grade) {
-    const g = grade.toLowerCase().replace(/\s+/g,'').replace('.','');
-    if (g.includes('psa10')) gradeKey='psa10';
-    else if (g.includes('psa9')) gradeKey='psa9';
-    else if (g.includes('psa8')) gradeKey='psa8';
-    else if (g.includes('psa7')) gradeKey='psa7';
-    else if (g.includes('bgs10')||g.includes('black')) gradeKey='bgs10';
-    else if (g.includes('bgs95')||g.includes('bgs9.5')) gradeKey='bgs95';
-    else if (g.includes('bgs9')) gradeKey='bgs9';
-    else if (g.includes('cgc10')||g.includes('pristine')) gradeKey='cgc10';
-    else if (g.includes('cgc95')||g.includes('cgc9.5')) gradeKey='cgc95';
-    else if (g.includes('cgc9')) gradeKey='cgc9';
-    // If the DB price already reflects a specific grade in the set name, don't double-multiply
-    const setLower = card.set.toLowerCase();
-    const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
-    if (!alreadyGraded && gradeKey !== 'raw') {
-      price = Math.round(card.price * gradeMultipliers[gradeKey]);
+
+  if (gradeKey === 'raw') {
+    // Ask if card is graded
+    const grade = prompt('Is this card graded? Enter grade or leave blank for raw:\n\nPSA 10, PSA 9, PSA 8, BGS 10, BGS 9.5, CGC 10, CGC 9.5');
+    if (grade) {
+      const g = grade.toLowerCase().replace(/\s+/g,'').replace('.','');
+      if (g.includes('psa10')||g.includes('10')) gradeKey='psa10';
+      else if (g.includes('psa9')||g==='9') gradeKey='psa9';
+      else if (g.includes('psa8')||g==='8') gradeKey='psa8';
+      else if (g.includes('psa7')||g==='7') gradeKey='psa7';
+      else if (g.includes('bgs10')||g.includes('black')) gradeKey='bgs10';
+      else if (g.includes('bgs95')||g.includes('9.5')) gradeKey='bgs95';
+      else if (g.includes('bgs9')) gradeKey='bgs9';
+      else if (g.includes('cgc10')||g.includes('pristine')) gradeKey='cgc10';
+      else if (g.includes('cgc95')) gradeKey='cgc95';
+      else if (g.includes('cgc9')) gradeKey='cgc9';
     }
   }
+
+  const setLower = card.set.toLowerCase();
+  const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
+  if (!alreadyGraded && gradeKey !== 'raw') {
+    price = Math.round(card.price * gradeMultipliers[gradeKey]);
+  }
+
   sideCards[side].push({name:card.name, set:card.set, price, cat:card.cat, grade:gradeKey});
   document.getElementById('search'+side).value='';
   results.classList.remove('open');
+  // Clear detected grade after use
+  window['_detectedGrade_' + side] = null;
   renderList(side);
 }
 
@@ -583,7 +590,7 @@ function analyze(){
   document.getElementById('customPrice'+s).addEventListener('keydown',e=>{if(e.key==='Enter')addCustomCard(s)});
 });
 
-// ===== CARD SCANNING (Client-side OCR — Zero Setup) =====
+// ===== CARD SCANNING (OCR + Smart Matching) =====
 const uploadedFiles = {A: [], B: []};
 
 const origHandleFiles = handleFiles;
@@ -592,14 +599,12 @@ handleFiles = function(files, side) {
   origHandleFiles(files, side);
   updateScanButtons();
 };
-
 const origClearImages = clearImages;
 clearImages = function(side, e) {
   uploadedFiles[side] = [];
   origClearImages(side, e);
   updateScanButtons();
 };
-
 function updateScanButtons() {
   ['A','B'].forEach(s => {
     const btn = document.getElementById('scanBtn'+s);
@@ -613,35 +618,132 @@ function updateScanButtons() {
 }
 updateScanButtons();
 
-function fuzzyMatch(text) {
-  const lower = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
-  const words = lower.split(/\s+/).filter(w => w.length >= 3);
-  if (!words.length) return [];
-  return db.map(card => {
-    const ct = (card.name + ' ' + card.set).toLowerCase();
-    let score = 0;
-    const mw = [];
-    words.forEach(w => { if (ct.includes(w)) { score += w.length; mw.push(w); } });
-    if (mw.length >= 2) score *= 1.5;
-    if (mw.length >= 3) score *= 2;
-    return { card, score, mw };
-  }).filter(s => s.score > 8 && s.mw.length >= 2).sort((a, b) => b.score - a.score);
+// Card number → DB index for precise slab matching
+const cardNumberMap = {};
+db.forEach((card, i) => {
+  // Extract card numbers like "161/131", "#57", "#311", "#1", "238/191" etc
+  const nums = card.set.match(/\d+\/\d+|#\d+/g);
+  if (nums) nums.forEach(n => { cardNumberMap[n.replace('#','')] = i; });
+});
+
+// Unique name keywords that can match a single card by themselves
+const uniqueNames = {
+  'umbreon': null, 'charizard': null, 'pikachu': null, 'sylveon': null,
+  'espeon': null, 'leafeon': null, 'glaceon': null, 'vaporeon': null,
+  'flareon': null, 'jolteon': null, 'eevee': null, 'ceruledge': null, 'mewtwo': null,
+  'flagg': null, 'wembanyama': null, 'wemby': null, 'mahomes': null,
+  'ohtani': null, 'mantle': null, 'griffey': null, 'skenes': null
+};
+// Map unique names to their DB indices
+db.forEach((card, i) => {
+  const nameLower = card.name.toLowerCase();
+  Object.keys(uniqueNames).forEach(uname => {
+    if (nameLower.includes(uname)) {
+      if (uniqueNames[uname] === null) uniqueNames[uname] = [i];
+      else uniqueNames[uname].push(i);
+    }
+  });
+});
+
+function detectGrade(text) {
+  const t = text.toLowerCase().replace(/[^a-z0-9.\s]/g, ' ');
+  // PSA grades
+  if (/psa\s*(?:gem\s*(?:mt|mint))?\s*10/i.test(t) || /gem\s*(?:mt|mint)\s*10/i.test(t)) return 'psa10';
+  if (/psa\s*(?:mint)?\s*9(?:\s|$)/i.test(t)) return 'psa9';
+  if (/psa\s*(?:nm.?mt)?\s*8/i.test(t)) return 'psa8';
+  if (/psa\s*(?:nm)?\s*7/i.test(t)) return 'psa7';
+  // BGS grades
+  if (/b(?:gs|eckett)\s*(?:pristine|black)?\s*10/i.test(t)) return 'bgs10';
+  if (/b(?:gs|eckett)\s*(?:gem\s*mint)?\s*9[\s.]5/i.test(t)) return 'bgs95';
+  if (/b(?:gs|eckett)\s*(?:mint)?\s*9(?:\s|$)/i.test(t)) return 'bgs9';
+  // CGC grades
+  if (/cgc\s*(?:pristine)?\s*10/i.test(t)) return 'cgc10';
+  if (/cgc\s*(?:gem)?\s*9[\s.]5/i.test(t)) return 'cgc95';
+  if (/cgc\s*(?:mint)?\s*9(?:\s|$)/i.test(t)) return 'cgc9';
+  // Common OCR misreads of PSA
+  if (/(p[s5][a4]|ps[a@])\s*10/i.test(t)) return 'psa10';
+  if (/(gem\s*m[ti1]n?t?\s*10)/i.test(t)) return 'psa10';
+  return 'raw';
 }
 
-function parseKeywords(text) {
-  const kw = [
-    'flagg','wembanyama','wemby','jordan','lebron','curry','luka','kobe','edwards','giannis',
-    'mahomes','allen','burrow','williams','daniels','bowers','sanders','lawrence','hurts','brady',
-    'ohtani','skenes','trout','griffey','mantle','witt','henderson','anthony','knueppel','harper',
-    'charizard','pikachu','umbreon','mewtwo','mew','eevee','sylveon','espeon',
-    'leafeon','glaceon','vaporeon','flareon','jolteon','ceruledge',
-    'prizm','topps','chrome','bowman','panini','mosaic','fleer','upper deck',
-    'prismatic','evolutions','evolving','skies','surging','sparks','obsidian','phantasmal',
-    'rookie','auto','refractor','silver','holo','psa','bgs',
-    'sir','sar','vmax','alt art','special','illustration'
-  ];
-  const lower = text.toLowerCase();
-  return kw.filter(k => lower.includes(k));
+// Preprocess image for better OCR
+function preprocessImage(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(2000 / img.width, 2000 / img.height, 2);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      // Draw scaled
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      // Increase contrast + convert near-grayscale
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imageData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        // Grayscale
+        const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+        // Contrast boost
+        const c = ((gray - 128) * 1.5) + 128;
+        const v = Math.max(0, Math.min(255, c));
+        d[i] = d[i+1] = d[i+2] = v;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      canvas.toBlob(blob => resolve(blob), 'image/png');
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function smartMatch(ocrText) {
+  const text = ocrText.toLowerCase().replace(/[^a-z0-9/.\s]/g, ' ');
+  const results = [];
+  const added = new Set();
+
+  // 1. Card number matching (most precise for slabs)
+  const numberPatterns = text.match(/\d{1,3}\s*[/]\s*\d{1,3}/g) || [];
+  numberPatterns.forEach(pat => {
+    const clean = pat.replace(/\s/g, '');
+    if (cardNumberMap[clean] !== undefined) {
+      const idx = cardNumberMap[clean];
+      if (!added.has(idx)) { results.push({card: db[idx], confidence: 'high'}); added.add(idx); }
+    }
+  });
+
+  // 2. Unique name matching (single keyword enough)
+  Object.entries(uniqueNames).forEach(([name, indices]) => {
+    if (indices && text.includes(name)) {
+      // If multiple cards match this name, try to narrow down
+      const best = indices.length === 1 ? indices :
+        indices.filter(i => {
+          const card = db[i];
+          // Check if other words from card name/set appear in OCR text
+          const cardWords = (card.name + ' ' + card.set).toLowerCase().split(/\s+/);
+          return cardWords.filter(w => w.length > 3 && text.includes(w)).length >= 2;
+        });
+      const pick = best.length ? best : [indices[0]];
+      pick.forEach(idx => {
+        if (!added.has(idx)) { results.push({card: db[idx], confidence: 'medium'}); added.add(idx); }
+      });
+    }
+  });
+
+  // 3. Broad fuzzy match (for cards not caught above)
+  const words = text.split(/\s+/).filter(w => w.length >= 3);
+  db.forEach((card, idx) => {
+    if (added.has(idx)) return;
+    const ct = (card.name + ' ' + card.set).toLowerCase();
+    const matched = words.filter(w => ct.includes(w));
+    // Need at least 2 matching words with combined length > 6
+    const totalLen = matched.reduce((s, w) => s + w.length, 0);
+    if (matched.length >= 2 && totalLen > 6) {
+      results.push({card: db[idx], confidence: 'low'});
+      added.add(idx);
+    }
+  });
+
+  return results;
 }
 
 async function scanCards(side) {
@@ -652,14 +754,16 @@ async function scanCards(side) {
   const st = document.getElementById('scanStatus'+side);
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Scanning...';
-  st.textContent = '\u{1F50D} Reading card text (10-20 sec)...';
-  st.style.color = '#8b5cf6';
 
   try {
     let allText = '';
     for (let i = 0; i < files.length; i++) {
+      st.textContent = '\u{1F50D} Preprocessing photo ' + (i+1) + '/' + files.length + '...';
+      st.style.color = '#8b5cf6';
+      const processed = await preprocessImage(files[i]);
+
       st.textContent = '\u{1F50D} Scanning photo ' + (i+1) + '/' + files.length + '...';
-      const r = await Tesseract.recognize(files[i], 'eng', {
+      const r = await Tesseract.recognize(processed, 'eng', {
         logger: m => {
           if (m.status === 'recognizing text') {
             st.textContent = '\u{1F50D} Photo ' + (i+1) + '/' + files.length + ': ' + Math.round((m.progress||0)*100) + '%';
@@ -669,70 +773,48 @@ async function scanCards(side) {
       allText += ' ' + r.data.text;
     }
 
+    console.log('[CardScan OCR text]:', allText);
+
     st.textContent = '\u{1F9E0} Matching against database...';
-    const kws = parseKeywords(allText);
-    const matches = fuzzyMatch(allText);
-
-    // Also match just keywords
-    if (kws.length) {
-      fuzzyMatch(kws.join(' ')).forEach(m => {
-        if (!matches.find(e => e.card.name === m.card.name)) matches.push(m);
-      });
-    }
-
-    // Detect grading from OCR text
-    function detectGrade(text) {
-      const t = text.toLowerCase();
-      if (t.includes('psa') && t.includes('10')) return 'psa10';
-      if (t.includes('psa') && t.includes('gem mint')) return 'psa10';
-      if (t.includes('psa') && /\b9\b/.test(t)) return 'psa9';
-      if (t.includes('psa') && /\b8\b/.test(t)) return 'psa8';
-      if (t.includes('psa') && /\b7\b/.test(t)) return 'psa7';
-      if (t.includes('bgs') && t.includes('10') && (t.includes('black') || t.includes('pristine'))) return 'bgs10';
-      if (t.includes('bgs') && (t.includes('9.5') || t.includes('9 5'))) return 'bgs95';
-      if (t.includes('bgs') && /\b9\b/.test(t)) return 'bgs9';
-      if (t.includes('beckett') && t.includes('10')) return 'bgs10';
-      if (t.includes('beckett') && (t.includes('9.5') || t.includes('9 5'))) return 'bgs95';
-      if (t.includes('cgc') && t.includes('10') && t.includes('pristine')) return 'cgc10';
-      if (t.includes('cgc') && (t.includes('9.5') || t.includes('9 5'))) return 'cgc95';
-      if (t.includes('cgc') && /\b9\b/.test(t)) return 'cgc9';
-      return 'raw';
-    }
-
-    const detectedGrade = detectGrade(allText);
+    const grade = detectGrade(allText);
+    const matches = smartMatch(allText);
 
     if (matches.length) {
-      const added = new Set();
       let n = 0;
       matches.forEach(m => {
-        if (!added.has(m.card.name) && n < 10) {
-          let price = m.card.price;
-          let grade = detectedGrade;
-          // Don't double-multiply if DB entry already has a grade
-          const setLower = m.card.set.toLowerCase();
-          const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
-          if (!alreadyGraded && grade !== 'raw') {
-            price = Math.round(price * gradeMultipliers[grade]);
-          }
-          sideCards[side].push({name:m.card.name, set:m.card.set, price, cat:m.card.cat, grade});
-          added.add(m.card.name); n++;
+        if (n >= 10) return;
+        let price = m.card.price;
+        let g = grade;
+        const setLower = m.card.set.toLowerCase();
+        const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
+        if (!alreadyGraded && g !== 'raw') {
+          price = Math.round(price * gradeMultipliers[g]);
+        } else if (alreadyGraded) {
+          // DB price already reflects the grade in the set name
+          g = detectGrade(m.card.set);
         }
+        sideCards[side].push({name: m.card.name, set: m.card.set, price, cat: m.card.cat, grade: g});
+        n++;
       });
       renderList(side);
-      st.innerHTML = '\u2705 Found ' + n + ' card(s)! Review below and remove any wrong matches.';
+      const gradeMsg = grade !== 'raw' ? ' (' + gradeLabels[grade] + ' detected \u{1F3C6})' : '';
+      st.innerHTML = '\u2705 Found ' + n + ' card(s)!' + gradeMsg + ' Review below.';
       st.style.color = '#22c55e';
     } else {
-      const clean = allText.replace(/[\n\r]+/g,' ').replace(/\s+/g,' ').trim().substring(0,150);
-      st.innerHTML = '\u26A0\uFE0F Couldn\'t auto-match. Detected: <em style="color:#71717a">"' +
-        (clean||'no text') + '"</em><br>Search manually below, or try a clearer photo.';
+      // Show what we detected + quick-pick buttons for common cards
+      const clean = allText.replace(/[\n\r]+/g,' ').replace(/\s+/g,' ').trim().substring(0,200);
+      const gradeMsg = grade !== 'raw' ? '<br>\u{1F3C6} Grade detected: <strong style="color:#a78bfa">' + gradeLabels[grade] + '</strong>' : '';
+      st.innerHTML = '\u26A0\uFE0F Couldn\'t auto-match from OCR text.' + gradeMsg +
+        '<br><span style="color:#52525b">Text found: "' + (clean||'none') + '"</span>' +
+        '<br><span style="color:#a1a1aa">Use the search below to find your card — grade will be applied automatically.</span>';
       st.style.color = '#eab308';
-      if (kws.length) {
-        document.getElementById('search'+side).value = kws[0];
-        document.getElementById('search'+side).dispatchEvent(new Event('input'));
-      }
+
+      // Store detected grade so manual search picks it up
+      window['_detectedGrade_' + side] = grade;
     }
   } catch(e) {
-    st.textContent = '\u274C ' + (e.message||'Scan failed');
+    console.error('Scan error:', e);
+    st.textContent = '\u274C ' + (e.message || 'Scan failed. Try a clearer photo.');
     st.style.color = '#ef4444';
   }
   btn.innerHTML = '\u{1F916} Scan Photos with AI';
