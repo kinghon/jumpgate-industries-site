@@ -115,6 +115,18 @@
   .scan-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 2px 12px rgba(139,92,246,.3)}
   .scan-btn:disabled{opacity:.5;cursor:not-allowed}
   .scan-status{font-size:.7rem;color:#a1a1aa;text-align:center;margin-top:.4rem;min-height:1rem}
+
+  .clear-side-btn{display:inline-block;font-size:.6rem;color:#52525b;cursor:pointer;padding:.15rem .5rem;border:1px solid #27272a;border-radius:4px;transition:all .15s;margin-left:.5rem}
+  .clear-side-btn:hover{color:#ef4444;border-color:#ef4444;background:rgba(239,68,68,.08)}
+  .grade-select{background:#0a0a0f;border:1px solid #27272a;border-radius:6px;padding:.4rem .5rem;color:#e4e4e7;font-size:.7rem;font-family:inherit;outline:none;max-width:100px;cursor:pointer}
+  .grade-select:focus{border-color:#3f3f46}
+  .ce-grade{font-size:.6rem;color:#a78bfa;font-weight:600;margin-left:.3rem}
+  .grade-badge{display:inline-block;font-size:.55rem;padding:.1rem .35rem;border-radius:3px;font-weight:700;margin-left:.3rem}
+  .grade-badge.psa{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.25)}
+  .grade-badge.bgs{background:rgba(59,130,246,.15);color:#3b82f6;border:1px solid rgba(59,130,246,.25)}
+  .grade-badge.cgc{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.25)}
+  .grade-badge.raw{background:rgba(113,113,122,.15);color:#71717a;border:1px solid rgba(113,113,122,.25)}
+
   @keyframes spin{to{transform:rotate(360deg)}}
   .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.3rem}
 
@@ -144,7 +156,7 @@
     <div class="side side-a">
       <div class="side-header">
         <span class="side-title">🅰️ Person A</span>
-        <span class="side-total" id="totalA">$0.00</span>
+        <div><span class="side-total" id="totalA">$0.00</span><span class="clear-side-btn" onclick="clearSide('A')">✕ Clear</span></div>
       </div>
       <div class="upload-zone" id="uploadA" onclick="document.getElementById('fileA').click()">
         <input type="file" id="fileA" multiple accept="image/*">
@@ -161,6 +173,19 @@
         <div class="custom-add">
           <input type="text" id="customNameA" placeholder="Card name">
           <input type="text" id="customPriceA" placeholder="$ Value" style="max-width:80px">
+          <select class="grade-select" id="customGradeA">
+            <option value="raw">Raw</option>
+            <option value="psa10">PSA 10</option>
+            <option value="psa9">PSA 9</option>
+            <option value="psa8">PSA 8</option>
+            <option value="psa7">PSA 7</option>
+            <option value="bgs10">BGS 10 Black</option>
+            <option value="bgs95">BGS 9.5</option>
+            <option value="bgs9">BGS 9</option>
+            <option value="cgc10">CGC 10 Pristine</option>
+            <option value="cgc95">CGC 9.5</option>
+            <option value="cgc9">CGC 9</option>
+          </select>
           <button onclick="addCustomCard('A')">Add</button>
         </div>
       </div>
@@ -174,7 +199,7 @@
     <div class="side side-b">
       <div class="side-header">
         <span class="side-title">🅱️ Person B</span>
-        <span class="side-total" id="totalB">$0.00</span>
+        <div><span class="side-total" id="totalB">$0.00</span><span class="clear-side-btn" onclick="clearSide('B')">✕ Clear</span></div>
       </div>
       <div class="upload-zone" id="uploadB" onclick="document.getElementById('fileB').click()">
         <input type="file" id="fileB" multiple accept="image/*">
@@ -191,6 +216,19 @@
         <div class="custom-add">
           <input type="text" id="customNameB" placeholder="Card name">
           <input type="text" id="customPriceB" placeholder="$ Value" style="max-width:80px">
+          <select class="grade-select" id="customGradeB">
+            <option value="raw">Raw</option>
+            <option value="psa10">PSA 10</option>
+            <option value="psa9">PSA 9</option>
+            <option value="psa8">PSA 8</option>
+            <option value="psa7">PSA 7</option>
+            <option value="bgs10">BGS 10 Black</option>
+            <option value="bgs95">BGS 9.5</option>
+            <option value="bgs9">BGS 9</option>
+            <option value="cgc10">CGC 10 Pristine</option>
+            <option value="cgc95">CGC 9.5</option>
+            <option value="cgc9">CGC 9</option>
+          </select>
           <button onclick="addCustomCard('B')">Add</button>
         </div>
       </div>
@@ -300,6 +338,45 @@ const db=[
 ];
 
 const catIcons={basketball:'🏀',football:'🏈',baseball:'⚾',pokemon:'⚡'};
+
+// Grading multipliers (relative to raw card value)
+const gradeMultipliers = {
+  raw: 1,
+  psa10: 3.5, psa9: 1.8, psa8: 1.2, psa7: 0.9,
+  bgs10: 5.0, bgs95: 2.5, bgs9: 1.6,
+  cgc10: 4.0, cgc95: 2.2, cgc9: 1.5
+};
+
+const gradeLabels = {
+  raw: 'Raw', psa10: 'PSA 10', psa9: 'PSA 9', psa8: 'PSA 8', psa7: 'PSA 7',
+  bgs10: 'BGS 10 BL', bgs95: 'BGS 9.5', bgs9: 'BGS 9',
+  cgc10: 'CGC 10 P', cgc95: 'CGC 9.5', cgc9: 'CGC 9'
+};
+
+function gradeClass(g) {
+  if (g.startsWith('psa')) return 'psa';
+  if (g.startsWith('bgs')) return 'bgs';
+  if (g.startsWith('cgc')) return 'cgc';
+  return 'raw';
+}
+
+function clearSide(side) {
+  sideCards[side] = [];
+  uploadedFiles[side] = [];
+  renderList(side);
+  // Clear images too
+  const zone = document.getElementById('upload'+side);
+  zone.classList.remove('has-images');
+  zone.innerHTML = '<input type="file" id="file'+side+'" multiple accept="image/*">' +
+    '<div class="upload-icon">📸</div>' +
+    '<div class="upload-text">Upload photos of Person '+side+'\'s cards</div>' +
+    '<div class="upload-sub">Click or drag · Multiple photos OK</div>';
+  document.getElementById('file'+side).addEventListener('change',function(){handleFiles(this.files,side)});
+  document.getElementById('scanStatus'+side).textContent = '';
+  updateScanButtons();
+  // Hide results if showing
+  document.getElementById('results').classList.remove('show');
+}
 const sideCards={A:[],B:[]};
 
 // Image upload handling
@@ -366,7 +443,30 @@ function clearImages(side,e){
 function addCard(side,idx,q){
   const results=document.getElementById('results'+side);
   const card=results._matches[idx];
-  sideCards[side].push({name:card.name,set:card.set,price:card.price,cat:card.cat});
+  // Ask if card is graded
+  const grade = prompt('Is this card graded? Enter grade or leave blank for raw:\n\nOptions: PSA 10, PSA 9, PSA 8, PSA 7, BGS 10, BGS 9.5, BGS 9, CGC 10, CGC 9.5, CGC 9');
+  let gradeKey = 'raw';
+  let price = card.price;
+  if (grade) {
+    const g = grade.toLowerCase().replace(/\s+/g,'').replace('.','');
+    if (g.includes('psa10')) gradeKey='psa10';
+    else if (g.includes('psa9')) gradeKey='psa9';
+    else if (g.includes('psa8')) gradeKey='psa8';
+    else if (g.includes('psa7')) gradeKey='psa7';
+    else if (g.includes('bgs10')||g.includes('black')) gradeKey='bgs10';
+    else if (g.includes('bgs95')||g.includes('bgs9.5')) gradeKey='bgs95';
+    else if (g.includes('bgs9')) gradeKey='bgs9';
+    else if (g.includes('cgc10')||g.includes('pristine')) gradeKey='cgc10';
+    else if (g.includes('cgc95')||g.includes('cgc9.5')) gradeKey='cgc95';
+    else if (g.includes('cgc9')) gradeKey='cgc9';
+    // If the DB price already reflects a specific grade in the set name, don't double-multiply
+    const setLower = card.set.toLowerCase();
+    const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
+    if (!alreadyGraded && gradeKey !== 'raw') {
+      price = Math.round(card.price * gradeMultipliers[gradeKey]);
+    }
+  }
+  sideCards[side].push({name:card.name, set:card.set, price, cat:card.cat, grade:gradeKey});
   document.getElementById('search'+side).value='';
   results.classList.remove('open');
   renderList(side);
@@ -375,10 +475,14 @@ function addCard(side,idx,q){
 function addCustomCard(side){
   const name=document.getElementById('customName'+side).value.trim();
   const price=parseFloat(document.getElementById('customPrice'+side).value.replace(/[$,]/g,''));
+  const grade=document.getElementById('customGrade'+side).value;
   if(!name||isNaN(price)){return}
-  sideCards[side].push({name,set:'Custom',price,cat:'custom'});
+  const gradeMulti = gradeMultipliers[grade] || 1;
+  const adjPrice = grade === 'raw' ? price : Math.round(price * gradeMulti);
+  sideCards[side].push({name, set:'Custom', price:adjPrice, cat:'custom', grade});
   document.getElementById('customName'+side).value='';
   document.getElementById('customPrice'+side).value='';
+  document.getElementById('customGrade'+side).value='raw';
   renderList(side);
 }
 
@@ -391,14 +495,18 @@ function renderList(side){
   const list=document.getElementById('list'+side);
   const total=sideCards[side].reduce((s,c)=>s+c.price,0);
   document.getElementById('total'+side).textContent='$'+total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-  list.innerHTML=sideCards[side].map((c,i)=>`<div class="card-entry">
-    <div class="ce-info">
-      <div class="ce-name">${c.cat!=='custom'?catIcons[c.cat]+' ':''}${c.name}</div>
-      <div class="ce-set">${c.set}</div>
-    </div>
-    <span class="ce-price">$${c.price.toLocaleString()}</span>
-    <span class="ce-remove" onclick="removeCard('${side}',${i})">✕</span>
-  </div>`).join('');
+  list.innerHTML=sideCards[side].map((c,i)=>{
+    const icon = c.cat!=='custom' ? catIcons[c.cat]+' ' : '';
+    const gb = c.grade && c.grade !== 'raw' ? '<span class="grade-badge '+gradeClass(c.grade)+'">'+gradeLabels[c.grade]+'</span>' : '';
+    return `<div class="card-entry">
+      <div class="ce-info">
+        <div class="ce-name">${icon}${c.name}${gb}</div>
+        <div class="ce-set">${c.set}</div>
+      </div>
+      <span class="ce-price">$${c.price.toLocaleString()}</span>
+      <span class="ce-remove" onclick="removeCard('${side}',${i})">✕</span>
+    </div>`;
+  }).join('');
 }
 
 function analyze(){
@@ -572,12 +680,41 @@ async function scanCards(side) {
       });
     }
 
+    // Detect grading from OCR text
+    function detectGrade(text) {
+      const t = text.toLowerCase();
+      if (t.includes('psa') && t.includes('10')) return 'psa10';
+      if (t.includes('psa') && t.includes('gem mint')) return 'psa10';
+      if (t.includes('psa') && /\b9\b/.test(t)) return 'psa9';
+      if (t.includes('psa') && /\b8\b/.test(t)) return 'psa8';
+      if (t.includes('psa') && /\b7\b/.test(t)) return 'psa7';
+      if (t.includes('bgs') && t.includes('10') && (t.includes('black') || t.includes('pristine'))) return 'bgs10';
+      if (t.includes('bgs') && (t.includes('9.5') || t.includes('9 5'))) return 'bgs95';
+      if (t.includes('bgs') && /\b9\b/.test(t)) return 'bgs9';
+      if (t.includes('beckett') && t.includes('10')) return 'bgs10';
+      if (t.includes('beckett') && (t.includes('9.5') || t.includes('9 5'))) return 'bgs95';
+      if (t.includes('cgc') && t.includes('10') && t.includes('pristine')) return 'cgc10';
+      if (t.includes('cgc') && (t.includes('9.5') || t.includes('9 5'))) return 'cgc95';
+      if (t.includes('cgc') && /\b9\b/.test(t)) return 'cgc9';
+      return 'raw';
+    }
+
+    const detectedGrade = detectGrade(allText);
+
     if (matches.length) {
       const added = new Set();
       let n = 0;
       matches.forEach(m => {
         if (!added.has(m.card.name) && n < 10) {
-          sideCards[side].push({name:m.card.name, set:m.card.set, price:m.card.price, cat:m.card.cat});
+          let price = m.card.price;
+          let grade = detectedGrade;
+          // Don't double-multiply if DB entry already has a grade
+          const setLower = m.card.set.toLowerCase();
+          const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
+          if (!alreadyGraded && grade !== 'raw') {
+            price = Math.round(price * gradeMultipliers[grade]);
+          }
+          sideCards[side].push({name:m.card.name, set:m.card.set, price, cat:m.card.cat, grade});
           added.add(m.card.name); n++;
         }
       });
