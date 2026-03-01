@@ -621,6 +621,9 @@ function updateScanButtons() {
     const btn = document.getElementById('scanBtn'+s);
     btn.disabled = !uploadedFiles[s].length;
     const st = document.getElementById('scanStatus'+s);
+    // Don't overwrite scan results (they contain grade picker HTML)
+    if (st.querySelector && st.querySelector('.grade-picker, .gp-btn, a[target]')) return;
+    if (st.innerHTML && (st.innerHTML.includes('grade-picker') || st.innerHTML.includes('Cert #') || st.innerHTML.includes('Found'))) return;
     if (uploadedFiles[s].length) {
       st.textContent = '\u{1F4F8} ' + uploadedFiles[s].length + ' photo(s) ready';
       st.style.color = '#a1a1aa';
