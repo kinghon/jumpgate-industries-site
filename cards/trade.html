@@ -323,26 +323,26 @@ const db=[
 {name:"Junior Caminero Bowman Chrome Auto",set:"2023 Bowman 1st Auto",cat:"baseball",price:120},
 {name:"Paul Skenes Bowman 1st Chrome Auto",set:"2022 Bowman Draft 1st",cat:"baseball",price:1800},
 // Pokemon
-{name:"Umbreon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 161/131",cat:"pokemon",price:1054},
-{name:"Charizard ex SAR (Prismatic Evo)",set:"Prismatic Evolutions",cat:"pokemon",price:285},
-{name:"Pikachu ex SIR (Surging Sparks)",set:"Surging Sparks 238/191",cat:"pokemon",price:195},
+{name:"Umbreon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 161/131",cat:"pokemon",price:1054,psa10:3200},
+{name:"Charizard ex SAR (Prismatic Evo)",set:"Prismatic Evolutions",cat:"pokemon",price:285,psa10:850},
+{name:"Pikachu ex SIR (Surging Sparks)",set:"Surging Sparks 238/191",cat:"pokemon",price:195,psa10:550},
 {name:"Umbreon VMAX Alt Art",set:"Evolving Skies PSA 10",cat:"pokemon",price:3520},
-{name:"Sylveon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 156/131",cat:"pokemon",price:309},
-{name:"Leafeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 144/131",cat:"pokemon",price:244},
-{name:"Espeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 155/131",cat:"pokemon",price:206},
+{name:"Sylveon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 156/131",cat:"pokemon",price:309,psa10:900},
+{name:"Leafeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 144/131",cat:"pokemon",price:244,psa10:700},
+{name:"Espeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 155/131",cat:"pokemon",price:206,psa10:600},
 {name:"1st Ed Shadowless Charizard Holo",set:"Base Set #4 PSA 7-8",cat:"pokemon",price:18500},
-{name:"Glaceon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 150/131",cat:"pokemon",price:172},
-{name:"Vaporeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 149/131",cat:"pokemon",price:167},
-{name:"Flareon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 146/131",cat:"pokemon",price:161},
-{name:"Charizard ex SIR (Phantasmal Flames)",set:"Phantasmal Flames",cat:"pokemon",price:245},
-{name:"Roaring Moon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 162/131",cat:"pokemon",price:153},
-{name:"Jolteon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 153/131",cat:"pokemon",price:143},
+{name:"Glaceon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 150/131",cat:"pokemon",price:172,psa10:500},
+{name:"Vaporeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 149/131",cat:"pokemon",price:167,psa10:480},
+{name:"Flareon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 146/131",cat:"pokemon",price:161,psa10:460},
+{name:"Charizard ex SIR (Phantasmal Flames)",set:"Phantasmal Flames",cat:"pokemon",price:245,psa10:750},
+{name:"Roaring Moon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 162/131",cat:"pokemon",price:153,psa10:440},
+{name:"Jolteon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 153/131",cat:"pokemon",price:143,psa10:420},
 {name:"Eevee Heroes Umbreon V Alt Art",set:"Japanese Eevee Heroes PSA 10",cat:"pokemon",price:850},
-{name:"Eevee ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 167/131",cat:"pokemon",price:117},
+{name:"Eevee ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 167/131",cat:"pokemon",price:117,psa10:350},
 {name:"Ancient Mew Holo Promo",set:"Movie Promo",cat:"pokemon",price:65},
 {name:"Mew ex SIR (151) — Bubble Mew",set:"SV 151",cat:"pokemon",price:185},
-{name:"Ceruledge ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 147/131",cat:"pokemon",price:94},
-{name:"Charizard ex SIR (Obsidian Flames)",set:"Obsidian Flames",cat:"pokemon",price:135}
+{name:"Ceruledge ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 147/131",cat:"pokemon",price:94,psa10:280},
+{name:"Charizard ex SIR (Obsidian Flames)",set:"Obsidian Flames",cat:"pokemon",price:135,psa10:425}
 ];
 
 const catIcons={basketball:'🏀',football:'🏈',baseball:'⚾',pokemon:'⚡'};
@@ -807,6 +807,15 @@ async function scanCards(side) {
 
     console.log('[CardScan OCR text]:', allText);
 
+    // Detect PSA cert number (8-10 digit number, usually the largest number on the slab)
+    const certMatches = allText.match(/\b(\d{8,10})\b/g);
+    let certNumber = null;
+    if (certMatches) {
+      // Filter out years and common non-cert numbers; cert numbers are typically 8+ digits
+      certNumber = certMatches.find(n => n.length >= 8 && !n.startsWith('2025') && !n.startsWith('2024') && !n.startsWith('2023'));
+    }
+    console.log('[CardScan cert]:', certNumber);
+
     st.textContent = '\u{1F9E0} Matching against database...';
     const grade = detectGrade(allText);
     const matches = smartMatch(allText);
@@ -842,7 +851,10 @@ async function scanCards(side) {
 
         grades.forEach(g => {
           const multi = (alreadyGraded || g.key === 'raw') ? 1 : getGradeMulti(cat, g.key);
-          const price = g.key === 'raw' ? basePrice : Math.round(basePrice * multi);
+          let price;
+          if (g.key === 'raw') { price = basePrice; }
+          else if (g.key === 'psa10' && m.card.psa10 && !alreadyGraded) { price = m.card.psa10; }
+          else { price = Math.round(basePrice * multi); }
           const isOCR = (g.key === ocrGrade && ocrGrade !== 'raw');
           html2 += '<button class="gp-btn ' + g.cls + (isOCR ? ' active' : '') + '" '
             + 'onclick="addScanned(\'' + side + '\',' + i + ',\'' + g.key + '\')">'
@@ -853,16 +865,40 @@ async function scanCards(side) {
       });
       html2 += '</div>';
 
+      // Add cert lookup link if detected
+      let certHtml = '';
+      if (certNumber) {
+        const ebayUrl = 'https://www.ebay.com/sch/i.html?_nkw=PSA+' + certNumber + '&LH_Complete=1&LH_Sold=1&_sop=13';
+        const psaUrl = 'https://www.psacard.com/cert/' + certNumber;
+        certHtml = '<div style="margin-top:.5rem;padding:.5rem;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:8px;text-align:center">'
+          + '<div style="font-size:.7rem;color:#a78bfa;font-weight:600;margin-bottom:.3rem">\u{1F50E} Cert #' + certNumber + ' detected</div>'
+          + '<div style="display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap">'
+          + '<a href="' + ebayUrl + '" target="_blank" style="font-size:.65rem;padding:.25rem .6rem;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:6px;color:#3b82f6;text-decoration:none">\u{1F4B0} Check eBay Sold Price</a>'
+          + '<a href="' + psaUrl + '" target="_blank" style="font-size:.65rem;padding:.25rem .6rem;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:6px;color:#ef4444;text-decoration:none">\u{1F3C6} Verify on PSA</a>'
+          + '</div>'
+          + '<div style="font-size:.6rem;color:#52525b;margin-top:.3rem">Find the exact sold price for this specific card</div>'
+          + '</div>';
+      }
+
       const gradeNote = ocrGrade !== 'raw'
         ? ' \u{1F3C6} Detected: <strong style="color:#a78bfa">' + gradeLabels[ocrGrade] + '</strong>'
         : '';
       st.innerHTML = '\u2705 Found ' + matches.length + ' card(s)!' + gradeNote
         + '<br><span style="color:#a1a1aa;font-size:.7rem">Tap a grade button to add with the correct value:</span>'
-        + html2;
+        + certHtml + html2;
       st.style.color = '#22c55e';
     } else {
       // Show what we detected + quick-pick buttons for common cards
       const clean = allText.replace(/[\n\r]+/g,' ').replace(/\s+/g,' ').trim().substring(0,200);
+      let certHtml2 = '';
+      if (certNumber) {
+        const ebayUrl = 'https://www.ebay.com/sch/i.html?_nkw=PSA+' + certNumber + '&LH_Complete=1&LH_Sold=1&_sop=13';
+        const psaUrl = 'https://www.psacard.com/cert/' + certNumber;
+        certHtml2 = '<br><div style="margin-top:.4rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap">'
+          + '<a href="' + ebayUrl + '" target="_blank" style="font-size:.65rem;padding:.25rem .6rem;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:6px;color:#3b82f6;text-decoration:none">\u{1F4B0} Check eBay Price for Cert #' + certNumber + '</a>'
+          + '<a href="' + psaUrl + '" target="_blank" style="font-size:.65rem;padding:.25rem .6rem;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:6px;color:#ef4444;text-decoration:none">\u{1F3C6} Verify on PSA</a>'
+          + '</div>';
+      }
       const gradeMsg = grade !== 'raw' ? '<br>\u{1F3C6} Grade detected: <strong style="color:#a78bfa">' + gradeLabels[grade] + '</strong>' : '';
       st.innerHTML = '\u26A0\uFE0F Couldn\'t auto-match from OCR text.' + gradeMsg +
         '<br><span style="color:#52525b">Text found: "' + (clean||'none') + '"</span>' +
