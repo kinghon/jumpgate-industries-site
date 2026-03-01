@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Analyzer — Fair or Fleeced?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',-apple-system,sans-serif;background:#0a0a0f;color:#e4e4e7;min-height:100vh;padding:1.5rem 1rem}
+  .container{max-width:1200px;margin:0 auto}
+  header{text-align:center;margin-bottom:2rem}
+  header h1{font-size:2rem;font-weight:900;margin-bottom:.3rem}
+  header p{color:#71717a;font-size:.85rem}
+  a.back{color:#3b82f6;font-size:.8rem;text-decoration:none;display:inline-block;margin-bottom:1rem}
+
+  /* Trade layout */
+  .trade-area{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;margin-bottom:1.5rem;align-items:start}
+  @media(max-width:900px){.trade-area{grid-template-columns:1fr;}.vs-divider{transform:none!important}}
+
+  .side{background:#18181b;border:1px solid #27272a;border-radius:14px;padding:1.25rem;min-height:400px}
+  .side-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+  .side-title{font-size:1rem;font-weight:800}
+  .side-total{font-size:1.1rem;font-weight:800}
+  .side-a .side-title{color:#3b82f6}.side-a .side-total{color:#3b82f6}
+  .side-b .side-title{color:#f97316}.side-b .side-total{color:#f97316}
+
+  /* Upload zone */
+  .upload-zone{border:2px dashed #27272a;border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1rem;position:relative;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .upload-zone:hover{border-color:#3f3f46;background:rgba(255,255,255,.02)}
+  .upload-zone.has-images{padding:.75rem;min-height:auto}
+  .upload-zone input{display:none}
+  .upload-zone .upload-icon{font-size:2rem;margin-bottom:.5rem}
+  .upload-zone .upload-text{font-size:.8rem;color:#71717a}
+  .upload-zone .upload-sub{font-size:.65rem;color:#3f3f46;margin-top:.25rem}
+  .preview-grid{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
+  .preview-img{width:80px;height:110px;object-fit:cover;border-radius:6px;border:1px solid #27272a}
+  .clear-imgs{font-size:.65rem;color:#ef4444;cursor:pointer;margin-top:.5rem}
+
+  /* Card search */
+  .add-card-area{margin-bottom:.75rem}
+  .card-search{width:100%;background:#0a0a0f;border:1px solid #27272a;border-radius:8px;padding:.5rem .75rem;color:#e4e4e7;font-size:.8rem;font-family:inherit;outline:none}
+  .card-search:focus{border-color:#3f3f46}
+  .search-results{background:#18181b;border:1px solid #27272a;border-radius:8px;max-height:200px;overflow-y:auto;margin-top:.25rem;display:none}
+  .search-results.open{display:block}
+  .sr-item{padding:.5rem .75rem;cursor:pointer;font-size:.75rem;display:flex;justify-content:space-between;align-items:center;transition:background .1s}
+  .sr-item:hover{background:#27272a}
+  .sr-name{color:#e4e4e7}.sr-price{color:#22c55e;font-weight:700}
+  .sr-cat{font-size:.6rem;color:#52525b;margin-left:.3rem}
+
+  /* Custom card input */
+  .custom-add{display:flex;gap:.4rem;margin-top:.5rem}
+  .custom-add input{flex:1;background:#0a0a0f;border:1px solid #27272a;border-radius:6px;padding:.4rem .6rem;color:#e4e4e7;font-size:.75rem;font-family:inherit;outline:none}
+  .custom-add input:focus{border-color:#3f3f46}
+  .custom-add button{background:#27272a;border:1px solid #3f3f46;border-radius:6px;padding:.4rem .8rem;color:#e4e4e7;font-size:.75rem;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .custom-add button:hover{background:#3f3f46}
+  .or-divider{text-align:center;font-size:.65rem;color:#3f3f46;margin:.4rem 0}
+
+  /* Card list */
+  .card-list{display:flex;flex-direction:column;gap:.4rem}
+  .card-entry{display:flex;align-items:center;justify-content:space-between;background:#0a0a0f;border-radius:6px;padding:.5rem .65rem;font-size:.75rem}
+  .ce-info{flex:1}
+  .ce-name{font-weight:600;color:#fafafa}
+  .ce-set{font-size:.6rem;color:#52525b}
+  .ce-price{font-weight:700;color:#22c55e;margin:0 .75rem;min-width:60px;text-align:right}
+  .ce-remove{color:#52525b;cursor:pointer;font-size:.7rem;padding:.2rem .4rem;border-radius:4px}
+  .ce-remove:hover{color:#ef4444;background:rgba(239,68,68,.1)}
+
+  /* VS divider */
+  .vs-divider{display:flex;align-items:center;justify-content:center;transform:translateY(120px)}
+  .vs-badge{background:#27272a;border:2px solid #3f3f46;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;color:#71717a}
+
+  /* Analyze button */
+  .analyze-btn{display:block;width:100%;max-width:400px;margin:0 auto 1.5rem;padding:.75rem;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;border-radius:10px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+  .analyze-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(59,130,246,.3)}
+  .analyze-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* Results */
+  .results{display:none;margin-bottom:2rem}
+  .results.show{display:block}
+  .result-card{background:#18181b;border:1px solid #27272a;border-radius:14px;padding:1.5rem;text-align:center}
+  .verdict{font-size:2.5rem;font-weight:900;margin-bottom:.25rem}
+  .verdict-label{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+  .verdict-sub{font-size:.85rem;color:#a1a1aa;margin-bottom:1.25rem;line-height:1.5}
+  .result-bars{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+  .result-bar{background:#0a0a0f;border-radius:10px;padding:1rem;text-align:center}
+  .rb-label{font-size:.7rem;color:#71717a;text-transform:uppercase;letter-spacing:.05em}
+  .rb-value{font-size:1.5rem;font-weight:800;margin-top:.25rem}
+  .rb-detail{font-size:.7rem;color:#52525b;margin-top:.25rem}
+  .advantage{background:#0a0a0f;border-radius:10px;padding:1rem;margin-top:1rem}
+  .adv-title{font-size:.75rem;color:#71717a;text-transform:uppercase;margin-bottom:.5rem}
+  .adv-bar-track{height:30px;background:#1a1a1f;border-radius:8px;overflow:hidden;display:flex;margin-bottom:.5rem}
+  .adv-bar-a{background:linear-gradient(90deg,#3b82f6,#2563eb);height:100%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;transition:width .8s ease}
+  .adv-bar-b{background:linear-gradient(90deg,#f97316,#ea580c);height:100%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;transition:width .8s ease}
+  .adv-labels{display:flex;justify-content:space-between;font-size:.7rem;color:#71717a}
+
+  .card-breakdown{margin-top:1rem;text-align:left}
+  .cb-title{font-size:.75rem;color:#71717a;text-transform:uppercase;margin-bottom:.5rem}
+  .cb-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .cb-side{background:#0a0a0f;border-radius:8px;padding:.75rem}
+  .cb-side-title{font-size:.7rem;font-weight:700;margin-bottom:.4rem}
+  .cb-item{display:flex;justify-content:space-between;font-size:.7rem;padding:.2rem 0;border-bottom:1px solid #18181b}
+  .cb-item:last-child{border:none}
+
+  footer{text-align:center;padding:1.5rem;color:#3f3f46;font-size:.65rem;border-top:1px solid #18181b;margin-top:2rem}
+  footer a{color:#3b82f6;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/cards/" class="back">← Back to Dashboard</a>
+  <header>
+    <h1>⚖️ Trade Analyzer</h1>
+    <p>Upload photos of both sides of a trade to see who's winning</p>
+  </header>
+
+  <div class="trade-area">
+    <!-- Side A -->
+    <div class="side side-a">
+      <div class="side-header">
+        <span class="side-title">🅰️ Person A</span>
+        <span class="side-total" id="totalA">$0.00</span>
+      </div>
+      <div class="upload-zone" id="uploadA" onclick="document.getElementById('fileA').click()">
+        <input type="file" id="fileA" multiple accept="image/*">
+        <div class="upload-icon">📸</div>
+        <div class="upload-text">Upload photos of Person A's cards</div>
+        <div class="upload-sub">Click or drag · Multiple photos OK</div>
+      </div>
+      <div class="add-card-area">
+        <input type="text" class="card-search" id="searchA" placeholder="🔍 Search card database to add..." autocomplete="off">
+        <div class="search-results" id="resultsA"></div>
+        <div class="or-divider">— or add custom —</div>
+        <div class="custom-add">
+          <input type="text" id="customNameA" placeholder="Card name">
+          <input type="text" id="customPriceA" placeholder="$ Value" style="max-width:80px">
+          <button onclick="addCustomCard('A')">Add</button>
+        </div>
+      </div>
+      <div class="card-list" id="listA"></div>
+    </div>
+
+    <!-- VS -->
+    <div class="vs-divider"><div class="vs-badge">VS</div></div>
+
+    <!-- Side B -->
+    <div class="side side-b">
+      <div class="side-header">
+        <span class="side-title">🅱️ Person B</span>
+        <span class="side-total" id="totalB">$0.00</span>
+      </div>
+      <div class="upload-zone" id="uploadB" onclick="document.getElementById('fileB').click()">
+        <input type="file" id="fileB" multiple accept="image/*">
+        <div class="upload-icon">📸</div>
+        <div class="upload-text">Upload photos of Person B's cards</div>
+        <div class="upload-sub">Click or drag · Multiple photos OK</div>
+      </div>
+      <div class="add-card-area">
+        <input type="text" class="card-search" id="searchB" placeholder="🔍 Search card database to add..." autocomplete="off">
+        <div class="search-results" id="resultsB"></div>
+        <div class="or-divider">— or add custom —</div>
+        <div class="custom-add">
+          <input type="text" id="customNameB" placeholder="Card name">
+          <input type="text" id="customPriceB" placeholder="$ Value" style="max-width:80px">
+          <button onclick="addCustomCard('B')">Add</button>
+        </div>
+      </div>
+      <div class="card-list" id="listB"></div>
+    </div>
+  </div>
+
+  <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">⚖️ Analyze Trade</button>
+
+  <div class="results" id="results">
+    <div class="result-card" id="resultCard"></div>
+  </div>
+
+  <footer>
+    Prices from eBay sold listings · Feb 2026 · <a href="/cards/">Back to Investment Dashboard</a><br>
+    Add cards from our database or enter custom values. Upload photos for visual reference.
+  </footer>
+</div>
+
+<script>
+// Card database with prices
+const db=[
+// Basketball
+{name:"Cooper Flagg RC Auto",set:"2025-26 Topps Chrome",cat:"basketball",price:4250},
+{name:"Victor Wembanyama Prizm Silver RC",set:"2023-24 Prizm PSA 10",cat:"basketball",price:1820},
+{name:"Kon Knueppel Topps Chrome RC",set:"2025-26 Topps Chrome",cat:"basketball",price:85},
+{name:"Michael Jordan 1986 Fleer RC",set:"1986-87 Fleer #57 PSA 8-9",cat:"basketball",price:42500},
+{name:"Cooper Flagg Chrome Refractor",set:"2025-26 Topps Chrome #251",cat:"basketball",price:145},
+{name:"Dylan Harper RC Auto",set:"2025-26 Topps Chrome",cat:"basketball",price:1150},
+{name:"Anthony Edwards Prizm Silver RC",set:"2020-21 Prizm PSA 10",cat:"basketball",price:2450},
+{name:"VJ Edgecombe Topps Chrome RC",set:"2025-26 Topps Chrome",cat:"basketball",price:75},
+{name:"Kobe Bryant 1996 Topps RC",set:"1996-97 Topps #138",cat:"basketball",price:1850},
+{name:"Shai Gilgeous-Alexander Prizm Silver",set:"2018-19 Prizm PSA 10",cat:"basketball",price:1200},
+{name:"LeBron James Topps Chrome RC",set:"2003-04 Chrome #111 PSA 9+",cat:"basketball",price:68000},
+{name:"Yang Hansen Chrome Advisory SSP",set:"2025-26 Topps Chrome",cat:"basketball",price:320},
+{name:"Luka Doncic Prizm Silver RC",set:"2018-19 Prizm PSA 10",cat:"basketball",price:3800},
+{name:"Stephen Curry Prizm Silver RC",set:"2012-13 Prizm PSA 10",cat:"basketball",price:8500},
+{name:"Cooper Flagg Power Players Holo",set:"2025 Topps #PP-16",cat:"basketball",price:35},
+{name:"Giannis Prizm Silver RC",set:"2013-14 Prizm PSA 10",cat:"basketball",price:4200},
+{name:"Amen Thompson Prizm Silver RC",set:"2023-24 Prizm PSA 10",cat:"basketball",price:85},
+{name:"Cooper Flagg Daydreamers",set:"2025 Topps Midnight",cat:"basketball",price:28},
+{name:"Jaylen Brown Prizm Silver",set:"2016-17 Prizm PSA 10",cat:"basketball",price:450},
+{name:"Wembanyama Topps Finest",set:"2025-26 Topps Finest",cat:"basketball",price:95},
+// Football
+{name:"Caleb Williams Prizm Silver RC",set:"2024 Prizm PSA 10",cat:"football",price:145},
+{name:"Jayden Daniels Prizm Silver RC",set:"2024 Prizm PSA 10",cat:"football",price:185},
+{name:"Brock Bowers Prizm Silver RC",set:"2024 Prizm PSA 10",cat:"football",price:95},
+{name:"Shedeur Sanders Bowman Chrome Auto",set:"2024 Bowman Chrome",cat:"football",price:310},
+{name:"Patrick Mahomes Prizm Silver RC",set:"2017 Prizm PSA 10",cat:"football",price:11500},
+{name:"Quinn Ewers Rookies & Stars Auto",set:"2025 Rookies & Stars",cat:"football",price:65},
+{name:"Jaxson Dart Mosaic Introductions",set:"2025 Mosaic",cat:"football",price:45},
+{name:"Dillon Gabriel Mosaic Kaleidoscopic",set:"2025 Mosaic SSP",cat:"football",price:55},
+{name:"Tom Brady 2000 Bowman RC",set:"2000 Bowman #236",cat:"football",price:2800},
+{name:"Trevor Lawrence Mosaic NFL Debut",set:"2021 Mosaic",cat:"football",price:35},
+{name:"Jerry Rice 1986 Topps RC",set:"1986 Topps #161",cat:"football",price:285},
+{name:"Jalen Hurts Prizm Base RC",set:"2020 Prizm #343",cat:"football",price:125},
+{name:"Bo Nix Prizm Silver RC",set:"2024 Prizm PSA 10",cat:"football",price:45},
+{name:"Josh Allen Prizm Silver RC",set:"2018 Prizm PSA 10",cat:"football",price:5200},
+{name:"Marvin Harrison Jr Prizm Silver RC",set:"2024 Prizm PSA 10",cat:"football",price:110},
+{name:"Malik Nabers Prizm Silver RC",set:"2024 Prizm PSA 10",cat:"football",price:75},
+{name:"Lamar Jackson Prizm Silver RC",set:"2018 Prizm PSA 10",cat:"football",price:1800},
+{name:"Cam Ward Bowman Chrome Auto",set:"2024 Bowman Chrome",cat:"football",price:195},
+{name:"Joe Burrow Prizm Silver RC",set:"2020 Prizm PSA 10",cat:"football",price:850},
+{name:"Saquon Barkley Prizm Silver RC",set:"2018 Prizm PSA 10",cat:"football",price:185},
+// Baseball
+{name:"Paul Skenes Topps Chrome RC Auto",set:"2024 Chrome Update",cat:"baseball",price:525},
+{name:"Nick Kurtz 2026 Topps Series 1 RC",set:"2026 Topps Series 1",cat:"baseball",price:45},
+{name:"Shohei Ohtani Chrome Update RC",set:"2018 Chrome Update PSA 10",cat:"baseball",price:2450},
+{name:"Konnor Griffin Bowman Draft Chrome",set:"2024 Bowman Draft 1st",cat:"baseball",price:42},
+{name:"Roman Anthony 2026 Topps RC",set:"2026 Topps Series 1",cat:"baseball",price:18},
+{name:"Shohei Ohtani 2018 Topps #700 RC",set:"2018 Topps Pitching",cat:"baseball",price:125},
+{name:"Pete Crow-Armstrong Chrome RC",set:"2024 Chrome PSA 10",cat:"baseball",price:85},
+{name:"Carlos Lagrange Bowman Chrome Auto",set:"2025 Bowman 1st Auto",cat:"baseball",price:180},
+{name:"Shohei Ohtani Topps Update RC",set:"2018 Update #US1",cat:"baseball",price:85},
+{name:"Jackson Holliday Bowman Chrome Auto",set:"2023 Bowman 1st Auto",cat:"baseball",price:350},
+{name:"Shohei Ohtani 2018 Bowman RC",set:"2018 Bowman #49",cat:"baseball",price:65},
+{name:"Mickey Mantle 1952 Topps",set:"1952 Topps #311 PSA 3-5",cat:"baseball",price:185000},
+{name:"Elly De La Cruz Chrome RC",set:"2023 Chrome PSA 10",cat:"baseball",price:75},
+{name:"Ohtani Chrome Update #HMT32",set:"2018 Chrome Update Debut",cat:"baseball",price:285},
+{name:"Bobby Witt Jr Chrome RC",set:"2022 Chrome PSA 10",cat:"baseball",price:145},
+{name:"Ken Griffey Jr 1989 Upper Deck RC",set:"1989 UD #1 PSA 9-10",cat:"baseball",price:3200},
+{name:"Mike Trout 2011 Topps Update RC",set:"2011 Update PSA 10",cat:"baseball",price:2800},
+{name:"Gunnar Henderson Chrome RC",set:"2023 Chrome PSA 10",cat:"baseball",price:95},
+{name:"Junior Caminero Bowman Chrome Auto",set:"2023 Bowman 1st Auto",cat:"baseball",price:120},
+{name:"Paul Skenes Bowman 1st Chrome Auto",set:"2022 Bowman Draft 1st",cat:"baseball",price:1800},
+// Pokemon
+{name:"Umbreon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 161/131",cat:"pokemon",price:1054},
+{name:"Charizard ex SAR (Prismatic Evo)",set:"Prismatic Evolutions",cat:"pokemon",price:285},
+{name:"Pikachu ex SIR (Surging Sparks)",set:"Surging Sparks 238/191",cat:"pokemon",price:195},
+{name:"Umbreon VMAX Alt Art",set:"Evolving Skies PSA 10",cat:"pokemon",price:3520},
+{name:"Sylveon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 156/131",cat:"pokemon",price:309},
+{name:"Leafeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 144/131",cat:"pokemon",price:244},
+{name:"Espeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 155/131",cat:"pokemon",price:206},
+{name:"1st Ed Shadowless Charizard Holo",set:"Base Set #4 PSA 7-8",cat:"pokemon",price:18500},
+{name:"Glaceon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 150/131",cat:"pokemon",price:172},
+{name:"Vaporeon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 149/131",cat:"pokemon",price:167},
+{name:"Flareon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 146/131",cat:"pokemon",price:161},
+{name:"Charizard ex SIR (Phantasmal Flames)",set:"Phantasmal Flames",cat:"pokemon",price:245},
+{name:"Roaring Moon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 162/131",cat:"pokemon",price:153},
+{name:"Jolteon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 153/131",cat:"pokemon",price:143},
+{name:"Eevee Heroes Umbreon V Alt Art",set:"Japanese Eevee Heroes PSA 10",cat:"pokemon",price:850},
+{name:"Eevee ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 167/131",cat:"pokemon",price:117},
+{name:"Ancient Mew Holo Promo",set:"Movie Promo",cat:"pokemon",price:65},
+{name:"Mew ex SIR (151) — Bubble Mew",set:"SV 151",cat:"pokemon",price:185},
+{name:"Ceruledge ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 147/131",cat:"pokemon",price:94},
+{name:"Charizard ex SIR (Obsidian Flames)",set:"Obsidian Flames",cat:"pokemon",price:135}
+];
+
+const catIcons={basketball:'🏀',football:'🏈',baseball:'⚾',pokemon:'⚡'};
+const sideCards={A:[],B:[]};
+
+// Image upload handling
+['A','B'].forEach(side=>{
+  const fileInput=document.getElementById('file'+side);
+  const zone=document.getElementById('upload'+side);
+
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.style.borderColor='#3f3f46'});
+  zone.addEventListener('dragleave',()=>{zone.style.borderColor='#27272a'});
+  zone.addEventListener('drop',e=>{
+    e.preventDefault();zone.style.borderColor='#27272a';
+    handleFiles(e.dataTransfer.files,side);
+  });
+  fileInput.addEventListener('change',()=>handleFiles(fileInput.files,side));
+});
+
+function handleFiles(files,side){
+  const zone=document.getElementById('upload'+side);
+  zone.classList.add('has-images');
+  let html='<div class="preview-grid">';
+  Array.from(files).forEach(f=>{
+    const url=URL.createObjectURL(f);
+    html+=`<img src="${url}" class="preview-img">`;
+  });
+  html+=`</div><div class="clear-imgs" onclick="clearImages('${side}',event)">✕ Clear photos</div>`;
+  zone.innerHTML=`<input type="file" id="file${side}" multiple accept="image/*">${html}`;
+  // Re-attach listener
+  document.getElementById('file'+side).addEventListener('change',function(){handleFiles(this.files,side)});
+}
+
+function clearImages(side,e){
+  e.stopPropagation();
+  const zone=document.getElementById('upload'+side);
+  zone.classList.remove('has-images');
+  zone.innerHTML=`<input type="file" id="file${side}" multiple accept="image/*">
+    <div class="upload-icon">📸</div>
+    <div class="upload-text">Upload photos of Person ${side}'s cards</div>
+    <div class="upload-sub">Click or drag · Multiple photos OK</div>`;
+  document.getElementById('file'+side).addEventListener('change',function(){handleFiles(this.files,side)});
+}
+
+// Search
+['A','B'].forEach(side=>{
+  const input=document.getElementById('search'+side);
+  const results=document.getElementById('results'+side);
+
+  input.addEventListener('input',()=>{
+    const q=input.value.toLowerCase().trim();
+    if(q.length<2){results.classList.remove('open');return}
+    const matches=db.filter(c=>c.name.toLowerCase().includes(q)||c.set.toLowerCase().includes(q)||c.cat.includes(q)).slice(0,8);
+    if(!matches.length){results.classList.remove('open');return}
+    results.innerHTML=matches.map((c,i)=>`<div class="sr-item" onclick="addCard('${side}',${i},'${q}')">
+      <span class="sr-name">${catIcons[c.cat]} ${c.name}<span class="sr-cat">${c.set}</span></span>
+      <span class="sr-price">$${c.price.toLocaleString()}</span>
+    </div>`).join('');
+    results.classList.add('open');
+    // store matches for reference
+    results._matches=matches;
+  });
+
+  input.addEventListener('blur',()=>setTimeout(()=>results.classList.remove('open'),200));
+});
+
+function addCard(side,idx,q){
+  const results=document.getElementById('results'+side);
+  const card=results._matches[idx];
+  sideCards[side].push({name:card.name,set:card.set,price:card.price,cat:card.cat});
+  document.getElementById('search'+side).value='';
+  results.classList.remove('open');
+  renderList(side);
+}
+
+function addCustomCard(side){
+  const name=document.getElementById('customName'+side).value.trim();
+  const price=parseFloat(document.getElementById('customPrice'+side).value.replace(/[$,]/g,''));
+  if(!name||isNaN(price)){return}
+  sideCards[side].push({name,set:'Custom',price,cat:'custom'});
+  document.getElementById('customName'+side).value='';
+  document.getElementById('customPrice'+side).value='';
+  renderList(side);
+}
+
+function removeCard(side,idx){
+  sideCards[side].splice(idx,1);
+  renderList(side);
+}
+
+function renderList(side){
+  const list=document.getElementById('list'+side);
+  const total=sideCards[side].reduce((s,c)=>s+c.price,0);
+  document.getElementById('total'+side).textContent='$'+total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  list.innerHTML=sideCards[side].map((c,i)=>`<div class="card-entry">
+    <div class="ce-info">
+      <div class="ce-name">${c.cat!=='custom'?catIcons[c.cat]+' ':''}${c.name}</div>
+      <div class="ce-set">${c.set}</div>
+    </div>
+    <span class="ce-price">$${c.price.toLocaleString()}</span>
+    <span class="ce-remove" onclick="removeCard('${side}',${i})">✕</span>
+  </div>`).join('');
+}
+
+function analyze(){
+  if(!sideCards.A.length||!sideCards.B.length){alert('Add cards to both sides first!');return}
+
+  const totalA=sideCards.A.reduce((s,c)=>s+c.price,0);
+  const totalB=sideCards.B.reduce((s,c)=>s+c.price,0);
+  const diff=Math.abs(totalA-totalB);
+  const pctDiff=((diff/Math.min(totalA,totalB))*100);
+  const winner=totalA>totalB?'B':'A';
+  const loser=winner==='A'?'B':'A';
+  const winnerTotal=winner==='A'?totalA:totalB;
+  const loserTotal=loser==='A'?totalA:totalB;
+  const roi=((winnerTotal-loserTotal)/loserTotal*100);
+  const pctA=(totalA/(totalA+totalB)*100);
+  const pctB=(totalB/(totalA+totalB)*100);
+
+  let verdict,verdictLabel,verdictColor,verdictSub;
+  if(pctDiff<=5){
+    verdict='✅';verdictLabel='FAIR TRADE';verdictColor='#22c55e';
+    verdictSub=`Both sides are within 5% of each other. This is about as even as trades get. Total difference: $${diff.toLocaleString()} (${pctDiff.toFixed(1)}%).`;
+  } else if(pctDiff<=15){
+    verdict='⚠️';verdictLabel='SLIGHT EDGE';verdictColor='#eab308';
+    verdictSub=`Person ${winner} has a slight advantage, gaining ~${roi.toFixed(1)}% more value. Difference: $${diff.toLocaleString()}. Close enough that condition/grading could swing it.`;
+  } else if(pctDiff<=40){
+    verdict='🔶';verdictLabel='UNEVEN TRADE';verdictColor='#f97316';
+    verdictSub=`Person ${winner} is clearly winning this trade with a ${roi.toFixed(1)}% ROI advantage. They're getting $${diff.toLocaleString()} more in value. Person ${loser} should reconsider.`;
+  } else {
+    verdict='🚨';verdictLabel='LOPSIDED — ROBBERY';verdictColor='#ef4444';
+    verdictSub=`Person ${winner} is making out like a bandit — ${roi.toFixed(0)}% more value ($${diff.toLocaleString()} difference). Person ${loser} is getting fleeced. Do NOT accept this trade.`;
+  }
+
+  const cardBreakdownA=sideCards.A.map(c=>`<div class="cb-item"><span>${c.name}</span><span style="color:#22c55e">$${c.price.toLocaleString()}</span></div>`).join('');
+  const cardBreakdownB=sideCards.B.map(c=>`<div class="cb-item"><span>${c.name}</span><span style="color:#22c55e">$${c.price.toLocaleString()}</span></div>`).join('');
+
+  document.getElementById('resultCard').innerHTML=`
+    <div class="verdict" style="color:${verdictColor}">${verdict}</div>
+    <div class="verdict-label" style="color:${verdictColor}">${verdictLabel}</div>
+    <div class="verdict-sub">${verdictSub}</div>
+    <div class="result-bars">
+      <div class="result-bar" style="border:1px solid ${totalA>=totalB?'#3b82f6':'#27272a'}">
+        <div class="rb-label">🅰️ Person A's Value</div>
+        <div class="rb-value" style="color:#3b82f6">$${totalA.toLocaleString()}</div>
+        <div class="rb-detail">${sideCards.A.length} card${sideCards.A.length>1?'s':''}</div>
+      </div>
+      <div class="result-bar" style="border:1px solid ${totalB>=totalA?'#f97316':'#27272a'}">
+        <div class="rb-label">🅱️ Person B's Value</div>
+        <div class="rb-value" style="color:#f97316">$${totalB.toLocaleString()}</div>
+        <div class="rb-detail">${sideCards.B.length} card${sideCards.B.length>1?'s':''}</div>
+      </div>
+    </div>
+    <div class="advantage">
+      <div class="adv-title">Value Distribution</div>
+      <div class="adv-bar-track">
+        <div class="adv-bar-a" style="width:${pctA}%">${pctA>=15?'A: '+pctA.toFixed(0)+'%':''}</div>
+        <div class="adv-bar-b" style="width:${pctB}%">${pctB>=15?'B: '+pctB.toFixed(0)+'%':''}</div>
+      </div>
+      <div class="adv-labels"><span>Person A</span><span>${pctDiff<=5?'≈ Even':'Person '+winner+' wins by $'+diff.toLocaleString()+' (+'+roi.toFixed(1)+'% ROI)'}</span><span>Person B</span></div>
+    </div>
+    <div class="card-breakdown">
+      <div class="cb-title">Card-by-Card Breakdown</div>
+      <div class="cb-grid">
+        <div class="cb-side"><div class="cb-side-title" style="color:#3b82f6">🅰️ Person A — $${totalA.toLocaleString()}</div>${cardBreakdownA}</div>
+        <div class="cb-side"><div class="cb-side-title" style="color:#f97316">🅱️ Person B — $${totalB.toLocaleString()}</div>${cardBreakdownB}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('results').classList.add('show');
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Enter key for custom add
+['A','B'].forEach(s=>{
+  document.getElementById('customPrice'+s).addEventListener('keydown',e=>{if(e.key==='Enter')addCustomCard(s)});
+});
+</script>
+</body>
+</html>
