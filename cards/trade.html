@@ -680,30 +680,31 @@ function detectGrade(text) {
 // Preprocess image for better OCR
 function preprocessImage(file) {
   return new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const scale = Math.min(2000 / img.width, 2000 / img.height, 2);
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      // Draw scaled
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      // Increase contrast + convert near-grayscale
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const d = imageData.data;
-      for (let i = 0; i < d.length; i += 4) {
-        // Grayscale
-        const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-        // Contrast boost
-        const c = ((gray - 128) * 1.5) + 128;
-        const v = Math.max(0, Math.min(255, c));
-        d[i] = d[i+1] = d[i+2] = v;
-      }
-      ctx.putImageData(imageData, 0, 0);
-      canvas.toBlob(blob => resolve(blob), 'image/png');
-    };
-    img.src = URL.createObjectURL(file);
+    const timeout = setTimeout(() => { console.warn('Preprocess timeout'); resolve(file); }, 8000);
+    try {
+      const img = new Image();
+      img.onerror = () => { clearTimeout(timeout); resolve(file); };
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(2000/img.width, 2000/img.height, 2);
+          canvas.width = Math.max(1, Math.round(img.width*scale));
+          canvas.height = Math.max(1, Math.round(img.height*scale));
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const d = imageData.data;
+          for (let i = 0; i < d.length; i += 4) {
+            const gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+            const v = Math.max(0, Math.min(255, ((gray-128)*1.5)+128));
+            d[i]=d[i+1]=d[i+2]=v;
+          }
+          ctx.putImageData(imageData, 0, 0);
+          canvas.toBlob(blob => { clearTimeout(timeout); resolve(blob||file); }, 'image/png');
+        } catch(e) { clearTimeout(timeout); resolve(file); }
+      };
+      img.src = URL.createObjectURL(file);
+    } catch(e) { clearTimeout(timeout); resolve(file); }
   });
 }
 
