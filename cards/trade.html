@@ -701,6 +701,20 @@ function smartMatch(ocrText) {
   const results = [];
   const added = new Set();
 
+  // Identity words — a match MUST include at least one of these to count
+  // These are player/character names that actually identify a specific card
+  const identityWords = new Set([
+    'umbreon','charizard','pikachu','sylveon','espeon','leafeon','glaceon',
+    'vaporeon','flareon','jolteon','eevee','ceruledge','mewtwo','mew',
+    'flagg','wembanyama','wemby','knueppel','harper','edgecombe','hansen',
+    'jordan','lebron','curry','luka','kobe','edwards','giannis','thompson','brown',
+    'mahomes','allen','burrow','williams','daniels','bowers','sanders',
+    'lawrence','hurts','brady','ewers','dart','gabriel','nix','nabers',
+    'harrison','ward','barkley','jackson','rice',
+    'ohtani','skenes','trout','griffey','mantle','witt','henderson',
+    'anthony','kurtz','griffin','lagrange','holliday','caminero','armstrong','cruz'
+  ]);
+
   // 1. Card number matching (most precise for slabs)
   const numberPatterns = text.match(/\d{1,3}\s*[/]\s*\d{1,3}/g) || [];
   numberPatterns.forEach(pat => {
@@ -714,11 +728,10 @@ function smartMatch(ocrText) {
   // 2. Unique name matching (single keyword enough)
   Object.entries(uniqueNames).forEach(([name, indices]) => {
     if (indices && text.includes(name)) {
-      // If multiple cards match this name, try to narrow down
+      // If multiple cards match this name, try to narrow down with context words
       const best = indices.length === 1 ? indices :
         indices.filter(i => {
           const card = db[i];
-          // Check if other words from card name/set appear in OCR text
           const cardWords = (card.name + ' ' + card.set).toLowerCase().split(/\s+/);
           return cardWords.filter(w => w.length > 3 && text.includes(w)).length >= 2;
         });
@@ -729,19 +742,27 @@ function smartMatch(ocrText) {
     }
   });
 
-  // 3. Broad fuzzy match (for cards not caught above)
+  // 3. Strict fuzzy match — REQUIRES an identity word match
+  // Generic words like "chrome", "topps", "2025" alone won't trigger a match
   const words = text.split(/\s+/).filter(w => w.length >= 3);
-  db.forEach((card, idx) => {
-    if (added.has(idx)) return;
-    const ct = (card.name + ' ' + card.set).toLowerCase();
-    const matched = words.filter(w => ct.includes(w));
-    // Need at least 2 matching words with combined length > 6
-    const totalLen = matched.reduce((s, w) => s + w.length, 0);
-    if (matched.length >= 2 && totalLen > 6) {
-      results.push({card: db[idx], confidence: 'low'});
-      added.add(idx);
-    }
-  });
+  const ocrHasIdentity = words.filter(w => identityWords.has(w));
+
+  if (ocrHasIdentity.length > 0) {
+    db.forEach((card, idx) => {
+      if (added.has(idx)) return;
+      const cardNameLower = card.name.toLowerCase();
+      // Card name must contain at least one of the identity words found in OCR
+      const nameMatch = ocrHasIdentity.some(w => cardNameLower.includes(w));
+      if (!nameMatch) return;
+      // Also need at least one more supporting word from set/name
+      const ct = (card.name + ' ' + card.set).toLowerCase();
+      const supporting = words.filter(w => !identityWords.has(w) && w.length > 3 && ct.includes(w));
+      if (supporting.length >= 1) {
+        results.push({card: db[idx], confidence: 'low'});
+        added.add(idx);
+      }
+    });
+  }
 
   return results;
 }
