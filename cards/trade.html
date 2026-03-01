@@ -104,6 +104,20 @@
 
   footer{text-align:center;padding:1.5rem;color:#3f3f46;font-size:.65rem;border-top:1px solid #18181b;margin-top:2rem}
   footer a{color:#3b82f6;text-decoration:none}
+
+  .settings-bar{text-align:center;margin-bottom:1.5rem}
+  .settings-toggle{display:inline-block;font-size:.75rem;color:#71717a;cursor:pointer;padding:.3rem .8rem;border:1px solid #27272a;border-radius:999px;transition:all .2s}
+  .settings-toggle:hover{border-color:#3f3f46;color:#e4e4e7}
+  .settings-panel{max-width:500px;margin:.75rem auto 0;background:#18181b;border:1px solid #27272a;border-radius:10px;padding:1rem;text-align:left}
+  .settings-label{font-size:.75rem;color:#a1a1aa;display:block;margin-bottom:.4rem}
+  .settings-status{font-size:.7rem;margin-top:.4rem}
+  .scan-btn{display:block;width:100%;margin-top:.5rem;padding:.5rem;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border:none;border-radius:8px;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+  .scan-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 2px 12px rgba(139,92,246,.3)}
+  .scan-btn:disabled{opacity:.5;cursor:not-allowed}
+  .scan-status{font-size:.7rem;color:#a1a1aa;text-align:center;margin-top:.4rem;min-height:1rem}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.3rem}
+
 </style>
 </head>
 <body>
@@ -113,6 +127,21 @@
     <h1>⚖️ Trade Analyzer</h1>
     <p>Upload photos of both sides of a trade to see who's winning</p>
   </header>
+
+  
+  <div class="settings-bar">
+    <div class="settings-toggle" onclick="document.getElementById('settingsPanel').style.display=document.getElementById('settingsPanel').style.display==='none'?'block':'none'">⚙️ AI Card Scanner — Click to Configure</div>
+    <div id="settingsPanel" style="display:none">
+      <div style="max-width:500px;margin:.75rem auto 0;background:#18181b;border:1px solid #27272a;border-radius:10px;padding:1rem;text-align:left">
+        <label style="font-size:.75rem;color:#a1a1aa;display:block;margin-bottom:.4rem">OpenAI API Key <span style="color:#52525b">(stored locally in your browser only)</span></label>
+        <div class="custom-add">
+          <input type="password" id="apiKeyInput" placeholder="sk-..." style="flex:1">
+          <button onclick="saveApiKey()">Save</button>
+        </div>
+        <div id="keyStatus" style="font-size:.7rem;margin-top:.4rem"></div>
+      </div>
+    </div>
+  </div>
 
   <div class="trade-area">
     <!-- Side A -->
@@ -127,6 +156,8 @@
         <div class="upload-text">Upload photos of Person A's cards</div>
         <div class="upload-sub">Click or drag · Multiple photos OK</div>
       </div>
+      <button class="scan-btn" id="scanBtnA" onclick="scanCards('A')" disabled>🤖 Scan Photos with AI</button>
+      <div class="scan-status" id="scanStatusA"></div>
       <div class="add-card-area">
         <input type="text" class="card-search" id="searchA" placeholder="🔍 Search card database to add..." autocomplete="off">
         <div class="search-results" id="resultsA"></div>
@@ -155,6 +186,8 @@
         <div class="upload-text">Upload photos of Person B's cards</div>
         <div class="upload-sub">Click or drag · Multiple photos OK</div>
       </div>
+      <button class="scan-btn" id="scanBtnB" onclick="scanCards('B')" disabled>🤖 Scan Photos with AI</button>
+      <div class="scan-status" id="scanStatusB"></div>
       <div class="add-card-area">
         <input type="text" class="card-search" id="searchB" placeholder="🔍 Search card database to add..." autocomplete="off">
         <div class="search-results" id="resultsB"></div>
@@ -445,6 +478,189 @@ function analyze(){
 ['A','B'].forEach(s=>{
   document.getElementById('customPrice'+s).addEventListener('keydown',e=>{if(e.key==='Enter')addCustomCard(s)});
 });
+
+// ===== AI CARD SCANNING =====
+const uploadedFiles = {A: [], B: []};
+
+// Override handleFiles to store file references
+const origHandleFiles = handleFiles;
+handleFiles = function(files, side) {
+  uploadedFiles[side] = Array.from(files);
+  origHandleFiles(files, side);
+  // Enable scan button if we have files and API key
+  updateScanButtons();
+};
+
+const origClearImages = clearImages;
+clearImages = function(side, e) {
+  uploadedFiles[side] = [];
+  origClearImages(side, e);
+  updateScanButtons();
+};
+
+function updateScanButtons() {
+  ['A','B'].forEach(s => {
+    const btn = document.getElementById('scanBtn'+s);
+    const hasFiles = uploadedFiles[s].length > 0;
+    const hasKey = !!localStorage.getItem('openai_api_key');
+    btn.disabled = !(hasFiles && hasKey);
+    if (!hasKey && hasFiles) {
+      document.getElementById('scanStatus'+s).textContent = '⚠️ Set your OpenAI API key above to enable AI scanning';
+      document.getElementById('scanStatus'+s).style.color = '#eab308';
+    } else if (hasFiles) {
+      document.getElementById('scanStatus'+s).textContent = '📸 ' + uploadedFiles[s].length + ' photo(s) ready to scan';
+      document.getElementById('scanStatus'+s).style.color = '#a1a1aa';
+    } else {
+      document.getElementById('scanStatus'+s).textContent = '';
+    }
+  });
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-')) {
+    document.getElementById('keyStatus').textContent = '❌ Key should start with sk-';
+    document.getElementById('keyStatus').style.color = '#ef4444';
+    return;
+  }
+  localStorage.setItem('openai_api_key', key);
+  document.getElementById('keyStatus').textContent = '✅ Key saved to browser storage';
+  document.getElementById('keyStatus').style.color = '#22c55e';
+  updateScanButtons();
+}
+
+// Load saved key on page load
+(function(){
+  const saved = localStorage.getItem('openai_api_key');
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    document.getElementById('keyStatus').textContent = '✅ Key loaded from browser storage';
+    document.getElementById('keyStatus').style.color = '#22c55e';
+  }
+  updateScanButtons();
+})();
+
+async function fileToBase64(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function scanCards(side) {
+  const apiKey = localStorage.getItem('openai_api_key');
+  if (!apiKey) { alert('Set your OpenAI API key first!'); return; }
+
+  const files = uploadedFiles[side];
+  if (!files.length) { alert('Upload photos first!'); return; }
+
+  const btn = document.getElementById('scanBtn'+side);
+  const status = document.getElementById('scanStatus'+side);
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Scanning...';
+  status.textContent = '🔍 Analyzing card images with GPT-4o Vision...';
+  status.style.color = '#8b5cf6';
+
+  try {
+    // Convert all images to base64
+    const imageContents = [];
+    for (const file of files) {
+      const b64 = await fileToBase64(file);
+      const mimeType = file.type || 'image/jpeg';
+      imageContents.push({
+        type: 'image_url',
+        image_url: { url: 'data:' + mimeType + ';base64,' + b64, detail: 'high' }
+      });
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: `Identify every trading card visible in these images. For each card, provide:
+1. The card name (player/character name + card type/variant)
+2. The set it's from
+3. The category: basketball, football, baseball, or pokemon
+4. Your estimated market value in USD based on recent eBay sold prices
+
+Respond ONLY with a JSON array like this, no other text:
+[{"name": "Card Name Here", "set": "Set Name", "cat": "basketball|football|baseball|pokemon", "price": 123}]
+
+If you can see the card's condition or grading (PSA 10, etc), factor that into the price. If you can't identify a card clearly, still include your best guess with a lower confidence price. Be specific with card variants (Silver Prizm, Chrome Refractor, etc).` },
+            ...imageContents
+          ]
+        }],
+        max_tokens: 2000,
+        temperature: 0.1
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || 'API error ' + response.status);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content.trim();
+
+    // Parse JSON from response (handle markdown code blocks)
+    let jsonStr = content;
+    const jsonMatch = content.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    if (jsonMatch) jsonStr = jsonMatch[0];
+
+    const identified = JSON.parse(jsonStr);
+
+    if (!identified.length) {
+      status.textContent = '⚠️ No cards identified in the photos. Try clearer images.';
+      status.style.color = '#eab308';
+      btn.innerHTML = '🤖 Scan Photos with AI';
+      btn.disabled = false;
+      return;
+    }
+
+    // Match to database or add as custom
+    identified.forEach(card => {
+      // Try to find in our database
+      const match = db.find(d =>
+        d.name.toLowerCase().includes(card.name.toLowerCase().split(' ')[0]) &&
+        d.cat === card.cat
+      );
+
+      if (match) {
+        sideCards[side].push({name: match.name, set: match.set, price: match.price, cat: match.cat});
+      } else {
+        sideCards[side].push({
+          name: card.name,
+          set: card.set || 'AI Identified',
+          price: Math.round(card.price) || 0,
+          cat: card.cat || 'custom'
+        });
+      }
+    });
+
+    renderList(side);
+    status.textContent = '✅ Found ' + identified.length + ' card(s)! Review below and adjust if needed.';
+    status.style.color = '#22c55e';
+
+  } catch (err) {
+    console.error('Scan error:', err);
+    status.textContent = '❌ ' + err.message;
+    status.style.color = '#ef4444';
+  }
+
+  btn.innerHTML = '🤖 Scan Photos with AI';
+  btn.disabled = false;
+  updateScanButtons();
+}
+
 </script>
 </body>
 </html>
