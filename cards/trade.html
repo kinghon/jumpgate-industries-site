@@ -127,6 +127,14 @@
   .grade-badge.cgc{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.25)}
   .grade-badge.raw{background:rgba(113,113,122,.15);color:#71717a;border:1px solid rgba(113,113,122,.25)}
 
+
+  .grade-picker{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin-top:.5rem}
+  .gp-btn{padding:.3rem .5rem;border-radius:6px;border:1px solid #27272a;background:#0a0a0f;color:#a1a1aa;font-size:.6rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;min-width:55px}
+  .gp-btn:hover{border-color:#8b5cf6;color:#e4e4e7}
+  .gp-btn.active{border-color:#8b5cf6;color:#fff;background:rgba(139,92,246,.2)}
+  .gp-btn.psa:hover,.gp-btn.psa.active{border-color:#ef4444;background:rgba(239,68,68,.15);color:#fca5a5}
+  .gp-btn.bgs:hover,.gp-btn.bgs.active{border-color:#3b82f6;background:rgba(59,130,246,.15);color:#93c5fd}
+  .gp-btn.cgc:hover,.gp-btn.cgc.active{border-color:#22c55e;background:rgba(34,197,94,.15);color:#86efac}
   @keyframes spin{to{transform:rotate(360deg)}}
   .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.3rem}
 
@@ -340,12 +348,15 @@ const db=[
 const catIcons={basketball:'🏀',football:'🏈',baseball:'⚾',pokemon:'⚡'};
 
 // Grading multipliers (relative to raw card value)
-const gradeMultipliers = {
-  raw: 1,
-  psa10: 3.5, psa9: 1.8, psa8: 1.2, psa7: 0.9,
-  bgs10: 5.0, bgs95: 2.5, bgs9: 1.6,
-  cgc10: 4.0, cgc95: 2.2, cgc9: 1.5
+const gradeMultiByCat = {
+  pokemon: {raw:1,psa10:4.75,psa9:2.2,psa8:1.4,psa7:1.0,bgs10:6.5,bgs95:3.0,bgs9:1.8,cgc10:5.0,cgc95:2.5,cgc9:1.6},
+  basketball: {raw:1,psa10:3.0,psa9:1.7,psa8:1.15,psa7:0.85,bgs10:4.5,bgs95:2.2,bgs9:1.5,cgc10:3.5,cgc95:2.0,cgc9:1.4},
+  football: {raw:1,psa10:3.0,psa9:1.7,psa8:1.15,psa7:0.85,bgs10:4.5,bgs95:2.2,bgs9:1.5,cgc10:3.5,cgc95:2.0,cgc9:1.4},
+  baseball: {raw:1,psa10:3.2,psa9:1.8,psa8:1.2,psa7:0.9,bgs10:4.5,bgs95:2.3,bgs9:1.5,cgc10:3.8,cgc95:2.1,cgc9:1.4},
+  custom: {raw:1,psa10:3.5,psa9:1.8,psa8:1.2,psa7:0.9,bgs10:5.0,bgs95:2.5,bgs9:1.6,cgc10:4.0,cgc95:2.2,cgc9:1.5}
 };
+function getGradeMulti(cat,grade){return (gradeMultiByCat[cat]||gradeMultiByCat.custom)[grade]||1;}
+const gradeMultipliers = gradeMultiByCat.custom;
 
 const gradeLabels = {
   raw: 'Raw', psa10: 'PSA 10', psa9: 'PSA 9', psa8: 'PSA 8', psa7: 'PSA 7',
@@ -468,7 +479,7 @@ function addCard(side,idx,q){
   const setLower = card.set.toLowerCase();
   const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
   if (!alreadyGraded && gradeKey !== 'raw') {
-    price = Math.round(card.price * gradeMultipliers[gradeKey]);
+    price = Math.round(card.price * getGradeMulti(card.cat, gradeKey));
   }
 
   sideCards[side].push({name:card.name, set:card.set, price, cat:card.cat, grade:gradeKey});
@@ -484,7 +495,7 @@ function addCustomCard(side){
   const price=parseFloat(document.getElementById('customPrice'+side).value.replace(/[$,]/g,''));
   const grade=document.getElementById('customGrade'+side).value;
   if(!name||isNaN(price)){return}
-  const gradeMulti = gradeMultipliers[grade] || 1;
+  const gradeMulti = getGradeMulti('custom', grade);
   const adjPrice = grade === 'raw' ? price : Math.round(price * gradeMulti);
   sideCards[side].push({name, set:'Custom', price:adjPrice, cat:'custom', grade});
   document.getElementById('customName'+side).value='';
@@ -801,25 +812,53 @@ async function scanCards(side) {
     const matches = smartMatch(allText);
 
     if (matches.length) {
-      let n = 0;
-      matches.forEach(m => {
-        if (n >= 10) return;
-        let price = m.card.price;
-        let g = grade;
+      // Show grade picker for each matched card
+      window['_pendingMatches_' + side] = matches.slice(0, 10);
+      const ocrGrade = grade;
+
+      let html2 = '<div style="margin-top:.5rem">';
+      matches.slice(0, 10).forEach((m, i) => {
+        const icon = catIcons[m.card.cat] || '';
         const setLower = m.card.set.toLowerCase();
         const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
-        if (!alreadyGraded && g !== 'raw') {
-          price = Math.round(price * gradeMultipliers[g]);
-        } else if (alreadyGraded) {
-          // DB price already reflects the grade in the set name
-          g = detectGrade(m.card.set);
-        }
-        sideCards[side].push({name: m.card.name, set: m.card.set, price, cat: m.card.cat, grade: g});
-        n++;
+        const basePrice = m.card.price;
+        const cat = m.card.cat;
+
+        html2 += '<div style="background:#0a0a0f;border-radius:8px;padding:.6rem;margin-bottom:.4rem">';
+        html2 += '<div style="font-size:.8rem;font-weight:600;margin-bottom:.3rem">' + icon + ' ' + m.card.name + '</div>';
+        html2 += '<div style="font-size:.65rem;color:#52525b;margin-bottom:.4rem">' + m.card.set + '</div>';
+        html2 += '<div style="font-size:.65rem;color:#a1a1aa;margin-bottom:.3rem">Select condition:</div>';
+        html2 += '<div class="grade-picker">';
+
+        const grades = [
+          {key:'raw',label:'Raw',cls:''},
+          {key:'psa10',label:'PSA 10',cls:'psa'},
+          {key:'psa9',label:'PSA 9',cls:'psa'},
+          {key:'bgs10',label:'BGS 10 BL',cls:'bgs'},
+          {key:'bgs95',label:'BGS 9.5',cls:'bgs'},
+          {key:'cgc10',label:'CGC 10',cls:'cgc'},
+          {key:'cgc95',label:'CGC 9.5',cls:'cgc'}
+        ];
+
+        grades.forEach(g => {
+          const multi = (alreadyGraded || g.key === 'raw') ? 1 : getGradeMulti(cat, g.key);
+          const price = g.key === 'raw' ? basePrice : Math.round(basePrice * multi);
+          const isOCR = (g.key === ocrGrade && ocrGrade !== 'raw');
+          html2 += '<button class="gp-btn ' + g.cls + (isOCR ? ' active' : '') + '" '
+            + 'onclick="addScanned(\'' + side + '\',' + i + ',\'' + g.key + '\')">'
+            + g.label + '<br><b>$' + price.toLocaleString() + '</b></button>';
+        });
+
+        html2 += '</div></div>';
       });
-      renderList(side);
-      const gradeMsg = grade !== 'raw' ? ' (' + gradeLabels[grade] + ' detected \u{1F3C6})' : '';
-      st.innerHTML = '\u2705 Found ' + n + ' card(s)!' + gradeMsg + ' Review below.';
+      html2 += '</div>';
+
+      const gradeNote = ocrGrade !== 'raw'
+        ? ' \u{1F3C6} Detected: <strong style="color:#a78bfa">' + gradeLabels[ocrGrade] + '</strong>'
+        : '';
+      st.innerHTML = '\u2705 Found ' + matches.length + ' card(s)!' + gradeNote
+        + '<br><span style="color:#a1a1aa;font-size:.7rem">Tap a grade button to add with the correct value:</span>'
+        + html2;
       st.style.color = '#22c55e';
     } else {
       // Show what we detected + quick-pick buttons for common cards
@@ -841,6 +880,33 @@ async function scanCards(side) {
   btn.innerHTML = '\u{1F916} Scan Photos with AI';
   btn.disabled = false;
   updateScanButtons();
+}
+
+function addScanned(side, idx, gradeKey) {
+  const matches = window['_pendingMatches_' + side];
+  if (!matches || !matches[idx]) return;
+  const m = matches[idx];
+  let price = m.card.price;
+  const setLower = m.card.set.toLowerCase();
+  const alreadyGraded = setLower.includes('psa') || setLower.includes('bgs') || setLower.includes('cgc');
+  if (!alreadyGraded && gradeKey !== 'raw') {
+    price = Math.round(price * getGradeMulti(m.card.cat, gradeKey));
+  }
+  // Update if already added, else add new
+  const existing = sideCards[side].find(c => c.name === m.card.name);
+  if (existing) {
+    existing.grade = gradeKey;
+    existing.price = price;
+  } else {
+    sideCards[side].push({name: m.card.name, set: m.card.set, price, cat: m.card.cat, grade: gradeKey});
+  }
+  renderList(side);
+  // Highlight selected button
+  const picker = document.getElementById ? null : null; // use event
+  if (event && event.target) {
+    const parent = event.target.closest('.grade-picker');
+    if (parent) { parent.querySelectorAll('.gp-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); }
+  }
 }
 
 </script>
