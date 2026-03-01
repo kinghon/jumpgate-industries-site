@@ -3,153 +3,295 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Top Trading Cards — eBay Sold Prices (Last 30 Days)</title>
+<title>Trading Card Investment Dashboard — eBay Sold Data</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Inter',-apple-system,sans-serif;background:#0a0a0f;color:#e4e4e7;min-height:100vh;padding:2rem 1rem}
-  .container{max-width:1400px;margin:0 auto}
-  header{text-align:center;margin-bottom:2.5rem}
-  header h1{font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#f59e0b,#ef4444,#8b5cf6,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem}
-  header p{color:#71717a;font-size:.95rem}
-  .period{display:inline-block;background:#18181b;border:1px solid #27272a;border-radius:999px;padding:.35rem 1rem;font-size:.8rem;color:#a1a1aa;margin-top:.75rem}
-  .summary-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:2rem}
-  .summary-card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:1rem;text-align:center}
-  .summary-card .label{font-size:.7rem;color:#71717a;text-transform:uppercase;letter-spacing:.05em}
-  .summary-card .value{font-size:1.5rem;font-weight:800;margin-top:.2rem}
-  .summary-card .sub{font-size:.7rem;color:#52525b;margin-top:.2rem}
-  .filter-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;justify-content:center}
-  .filter-tab{padding:.5rem 1.25rem;border-radius:999px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:.4rem}
+  .container{max-width:1440px;margin:0 auto}
+  header{text-align:center;margin-bottom:2rem}
+  header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#f59e0b,#ef4444,#8b5cf6,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.4rem}
+  header p{color:#71717a;font-size:.9rem}
+  .period{display:inline-block;background:#18181b;border:1px solid #27272a;border-radius:999px;padding:.3rem .9rem;font-size:.75rem;color:#a1a1aa;margin-top:.6rem}
+
+  /* Top picks */
+  .top-picks{margin-bottom:2rem}
+  .top-picks h2{font-size:1rem;font-weight:700;color:#a1a1aa;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+  .picks-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:.75rem}
+  .pick-card{background:linear-gradient(135deg,#18181b 0%,#1a1a22 100%);border:1px solid #27272a;border-radius:12px;padding:1rem;position:relative;overflow:hidden}
+  .pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+  .pick-card.basketball::before{background:linear-gradient(90deg,#f97316,#ea580c)}
+  .pick-card.football::before{background:linear-gradient(90deg,#22c55e,#16a34a)}
+  .pick-card.baseball::before{background:linear-gradient(90deg,#3b82f6,#2563eb)}
+  .pick-card.pokemon::before{background:linear-gradient(90deg,#eab308,#ca8a04)}
+  .pick-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:.5rem}
+  .pick-cat{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.15rem .5rem;border-radius:999px}
+  .pick-cat.basketball{background:rgba(249,115,22,.15);color:#f97316}
+  .pick-cat.football{background:rgba(34,197,94,.15);color:#22c55e}
+  .pick-cat.baseball{background:rgba(59,130,246,.15);color:#3b82f6}
+  .pick-cat.pokemon{background:rgba(234,179,8,.15);color:#eab308}
+  .pick-score{font-size:1.4rem;font-weight:800}
+  .pick-name{font-size:.95rem;font-weight:700;color:#fafafa;margin-bottom:.15rem}
+  .pick-set{font-size:.7rem;color:#52525b;margin-bottom:.6rem}
+  .pick-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+  .pick-metric{text-align:center;background:#0a0a0f;border-radius:6px;padding:.4rem .2rem}
+  .pick-metric .pm-label{font-size:.55rem;color:#52525b;text-transform:uppercase}
+  .pick-metric .pm-value{font-size:.8rem;font-weight:700;margin-top:.1rem}
+  .pick-why{font-size:.7rem;color:#71717a;margin-top:.5rem;padding-top:.5rem;border-top:1px solid #27272a;line-height:1.4}
+
+  /* Controls */
+  .controls{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;justify-content:center}
+  .search-input{background:#18181b;border:1px solid #27272a;border-radius:999px;padding:.5rem 1rem;color:#e4e4e7;font-size:.8rem;width:280px;outline:none;font-family:inherit}
+  .search-input::placeholder{color:#52525b}
+  .search-input:focus{border-color:#3f3f46}
+  .filter-tab{padding:.4rem 1rem;border-radius:999px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:.3rem}
   .filter-tab:hover{border-color:#3f3f46;color:#e4e4e7}
-  .filter-tab.active{color:#fff;border-color:#3f3f46}
-  .filter-tab.active[data-filter="all"]{background:#27272a}
-  .filter-tab.active[data-filter="basketball"]{background:rgba(249,115,22,.25);border-color:#f97316}
-  .filter-tab.active[data-filter="football"]{background:rgba(34,197,94,.25);border-color:#22c55e}
-  .filter-tab.active[data-filter="baseball"]{background:rgba(59,130,246,.25);border-color:#3b82f6}
-  .filter-tab.active[data-filter="pokemon"]{background:rgba(234,179,8,.25);border-color:#eab308}
-  .dot{width:8px;height:8px;border-radius:50%}
+  .filter-tab.active{color:#fff;border-color:#3f3f46;background:#27272a}
+  .dot{width:7px;height:7px;border-radius:50%}
   .dot-basketball{background:#f97316}.dot-football{background:#22c55e}.dot-baseball{background:#3b82f6}.dot-pokemon{background:#eab308}
-  .count-badge{font-size:.7rem;background:#27272a;padding:.1rem .5rem;border-radius:999px;color:#71717a;margin-left:.25rem}
-  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:.75rem}
-  .card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:1rem;transition:all .2s;position:relative;overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;display:block}
-  .card:hover{border-color:#3f3f46;transform:translateY(-2px);background:#1c1c21}
-  .card .rank{position:absolute;top:.6rem;right:.6rem;font-size:1.6rem;font-weight:800;color:#27272a;line-height:1}
-  .category-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:.15rem .5rem;border-radius:999px;margin-bottom:.5rem}
-  .badge-basketball{background:rgba(249,115,22,.15);color:#f97316}
-  .badge-football{background:rgba(34,197,94,.15);color:#22c55e}
-  .badge-baseball{background:rgba(59,130,246,.15);color:#3b82f6}
-  .badge-pokemon{background:rgba(234,179,8,.15);color:#eab308}
-  .card .card-name{font-size:.9rem;font-weight:700;color:#fafafa;margin-bottom:.2rem;padding-right:2rem;line-height:1.3}
-  .card .card-set{font-size:.75rem;color:#71717a;margin-bottom:.75rem}
-  .card .stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;border-top:1px solid #27272a;padding-top:.6rem}
-  .stat{text-align:center}.stat .stat-label{font-size:.6rem;color:#52525b;text-transform:uppercase;letter-spacing:.05em}.stat .stat-value{font-size:.9rem;font-weight:700;margin-top:.1rem}
-  .price-up{color:#22c55e}.price-down{color:#ef4444}.price-flat{color:#a1a1aa}
-  .ebay-link{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;color:#3b82f6;margin-top:.5rem;text-decoration:none;opacity:.7;transition:opacity .2s}
+  .sort-select{background:#18181b;border:1px solid #27272a;border-radius:999px;padding:.4rem .8rem;color:#a1a1aa;font-size:.8rem;font-family:inherit;outline:none;cursor:pointer}
+  .sort-select:focus{border-color:#3f3f46}
+
+  /* Signal legend */
+  .legend{display:flex;gap:1rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:#71717a}
+  .signal-dot{width:10px;height:10px;border-radius:50%;border:2px solid}
+  .signal-strong-buy{border-color:#22c55e;background:#22c55e}
+  .signal-buy{border-color:#22c55e;background:transparent}
+  .signal-hold{border-color:#eab308;background:transparent}
+  .signal-watch{border-color:#a1a1aa;background:transparent}
+  .signal-sell{border-color:#ef4444;background:transparent}
+
+  /* Card grid */
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:.6rem}
+  .card{background:#18181b;border:1px solid #27272a;border-radius:10px;padding:.9rem;transition:all .2s;text-decoration:none;color:inherit;display:block;position:relative}
+  .card:hover{border-color:#3f3f46;transform:translateY(-1px);background:#1c1c21}
+  .card-top{display:flex;justify-content:space-between;align-items:start;margin-bottom:.4rem}
+  .card-left{flex:1}
+  .card-right{text-align:right;min-width:70px}
+  .cat-badge{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:.12rem .4rem;border-radius:999px;margin-bottom:.3rem;display:inline-block}
+  .cat-basketball{background:rgba(249,115,22,.12);color:#f97316}
+  .cat-football{background:rgba(34,197,94,.12);color:#22c55e}
+  .cat-baseball{background:rgba(59,130,246,.12);color:#3b82f6}
+  .cat-pokemon{background:rgba(234,179,8,.12);color:#eab308}
+  .card-name{font-size:.85rem;font-weight:700;color:#fafafa;line-height:1.25;margin-bottom:.15rem}
+  .card-set{font-size:.7rem;color:#52525b}
+  .inv-score{font-size:1.5rem;font-weight:800;line-height:1}
+  .inv-label{font-size:.55rem;color:#52525b;text-transform:uppercase;margin-top:.1rem}
+  .signal-badge{display:inline-block;font-size:.6rem;font-weight:700;padding:.12rem .5rem;border-radius:999px;margin-top:.25rem}
+  .badge-strong-buy{background:rgba(34,197,94,.2);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
+  .badge-buy{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.15)}
+  .badge-hold{background:rgba(234,179,8,.1);color:#eab308;border:1px solid rgba(234,179,8,.15)}
+  .badge-watch{background:rgba(161,161,170,.1);color:#a1a1aa;border:1px solid rgba(161,161,170,.15)}
+  .badge-sell{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.15)}
+  .card-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem;margin-top:.6rem;padding-top:.5rem;border-top:1px solid #1e1e24}
+  .cs{text-align:center}
+  .cs .cs-label{font-size:.5rem;color:#3f3f46;text-transform:uppercase;letter-spacing:.04em}
+  .cs .cs-value{font-size:.75rem;font-weight:700;margin-top:.05rem}
+  .up{color:#22c55e}.down{color:#ef4444}.flat{color:#a1a1aa}
+  .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:.5rem}
+  .ebay-link{font-size:.65rem;color:#3b82f6;opacity:.6;transition:opacity .2s}
   .card:hover .ebay-link{opacity:1}
-  .search-bar{display:flex;justify-content:center;margin-bottom:1.5rem}
-  .search-bar input{background:#18181b;border:1px solid #27272a;border-radius:999px;padding:.6rem 1.25rem;color:#e4e4e7;font-size:.85rem;width:100%;max-width:400px;outline:none;font-family:inherit}
-  .search-bar input::placeholder{color:#52525b}
-  .search-bar input:focus{border-color:#3f3f46}
-  footer{text-align:center;margin-top:2.5rem;padding:1.5rem;color:#3f3f46;font-size:.7rem;border-top:1px solid #18181b}
-  .no-results{text-align:center;padding:3rem;color:#52525b;font-size:.9rem}
-  @media(max-width:768px){header h1{font-size:1.4rem}.card-grid{grid-template-columns:1fr}.summary-bar{grid-template-columns:repeat(2,1fr)}}
+  .inv-reason{font-size:.6rem;color:#52525b;max-width:70%;line-height:1.3}
+  .no-results{text-align:center;padding:3rem;color:#52525b;font-size:.9rem;display:none}
+  footer{text-align:center;margin-top:2rem;padding:1.5rem;color:#3f3f46;font-size:.65rem;border-top:1px solid #18181b}
+  footer a{color:#3b82f6;text-decoration:none}
+  @media(max-width:768px){header h1{font-size:1.3rem}.card-grid{grid-template-columns:1fr}.picks-grid{grid-template-columns:1fr}.controls{flex-direction:column;align-items:stretch}.search-input{width:100%}}
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>🃏 Top Trading Cards Dashboard</h1>
-    <p>Top 20 most transacted cards per category — eBay sold prices</p>
-    <span class="period">📅 Jan 29 – Feb 28, 2026 · Click any card to view eBay sold listings</span>
+    <h1>📈 Trading Card Investment Dashboard</h1>
+    <p>AI-scored investment signals from eBay sold data — top 20 per category</p>
+    <span class="period">📅 Jan 29 – Feb 28, 2026 · Scored on momentum, volume, liquidity & value</span>
   </header>
-  <div class="summary-bar">
-    <div class="summary-card"><div class="label">Total Cards</div><div class="value" style="color:#f59e0b">80</div><div class="sub">20 per category</div></div>
-    <div class="summary-card"><div class="label">🏀 Basketball</div><div class="value" style="color:#f97316">20</div><div class="sub">Flagg · Wemby · MJ</div></div>
-    <div class="summary-card"><div class="label">🏈 Football</div><div class="value" style="color:#22c55e">20</div><div class="sub">Caleb · Jayden · Mahomes</div></div>
-    <div class="summary-card"><div class="label">⚾ Baseball</div><div class="value" style="color:#3b82f6">20</div><div class="sub">Ohtani · Skenes · Kurtz</div></div>
-    <div class="summary-card"><div class="label">⚡ Pokémon</div><div class="value" style="color:#eab308">20</div><div class="sub">Umbreon · Charizard · Pikachu</div></div>
+
+  <div class="top-picks" id="topPicks"></div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="signal-dot signal-strong-buy"></span> Strong Buy (85+)</div>
+    <div class="legend-item"><span class="signal-dot signal-buy"></span> Buy (70-84)</div>
+    <div class="legend-item"><span class="signal-dot signal-hold"></span> Hold (50-69)</div>
+    <div class="legend-item"><span class="signal-dot signal-watch"></span> Watch (30-49)</div>
+    <div class="legend-item"><span class="signal-dot signal-sell"></span> Sell (&lt;30)</div>
   </div>
-  <div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 Search cards, players, sets..."></div>
-  <div class="filter-tabs">
-    <div class="filter-tab active" data-filter="all">All <span class="count-badge">80</span></div>
-    <div class="filter-tab" data-filter="basketball"><span class="dot dot-basketball"></span> Basketball <span class="count-badge">20</span></div>
-    <div class="filter-tab" data-filter="football"><span class="dot dot-football"></span> Football <span class="count-badge">20</span></div>
-    <div class="filter-tab" data-filter="baseball"><span class="dot dot-baseball"></span> Baseball <span class="count-badge">20</span></div>
-    <div class="filter-tab" data-filter="pokemon"><span class="dot dot-pokemon"></span> Pokémon <span class="count-badge">20</span></div>
+
+  <div class="controls">
+    <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search cards, players, sets...">
+    <div class="filter-tab active" data-filter="all">All (80)</div>
+    <div class="filter-tab" data-filter="basketball"><span class="dot dot-basketball"></span> Basketball</div>
+    <div class="filter-tab" data-filter="football"><span class="dot dot-football"></span> Football</div>
+    <div class="filter-tab" data-filter="baseball"><span class="dot dot-baseball"></span> Baseball</div>
+    <div class="filter-tab" data-filter="pokemon"><span class="dot dot-pokemon"></span> Pokémon</div>
+    <select class="sort-select" id="sortSelect">
+      <option value="score">Sort: Investment Score</option>
+      <option value="trend">Sort: Trend %</option>
+      <option value="volume">Sort: Volume</option>
+      <option value="price-low">Sort: Price (Low→High)</option>
+      <option value="price-high">Sort: Price (High→Low)</option>
+    </select>
   </div>
+
   <div class="card-grid" id="cardGrid"></div>
-  <div class="no-results" id="noResults" style="display:none">No cards match your search.</div>
-  <footer>Data sourced from eBay sold listings, Sports Card Investor, TCGPlayer, PriceCharting, and Beckett · Feb 2026<br>Prices reflect average eBay sold prices. Click any card to view real-time eBay sold listings.</footer>
+  <div class="no-results" id="noResults">No cards match your search.</div>
+
+  <footer>
+    Data: eBay sold listings, <a href="https://www.sportscardinvestor.com" target="_blank">Sports Card Investor</a>, <a href="https://www.tcgplayer.com" target="_blank">TCGPlayer</a>, <a href="https://www.pricecharting.com" target="_blank">PriceCharting</a>, <a href="https://www.beckett.com" target="_blank">Beckett</a> · Feb 2026<br>
+    Investment score is algorithmic and not financial advice. Click any card for real-time eBay sold listings.
+  </footer>
 </div>
 <script>
 const ebay=(q)=>`https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(q)}&LH_Complete=1&LH_Sold=1&_sop=16`;
-const cards=[
+
+// Raw price as number
+function priceNum(p){return parseFloat(p.replace(/[$,]/g,''))}
+function trendNum(t){return parseFloat(t.replace(/[+%,]/g,''))}
+
+// Investment score algorithm
+function calcScore(c){
+  const price=priceNum(c.price), trend=trendNum(c.trend), vol=parseInt(c.vol.replace(/,/g,'')), dir=c.dir;
+  let score=50; // base
+
+  // Momentum (0-30 pts): positive trend is good, but extreme spikes can mean bubble
+  if(dir==='up'){
+    if(trend>=100) score+=22; // strong momentum but cap for bubble risk
+    else if(trend>=40) score+=28; // sweet spot
+    else if(trend>=15) score+=20;
+    else if(trend>=5) score+=12;
+    else score+=5;
+  } else {
+    if(trend>50) score-=25; // crashing
+    else if(trend>20) score-=15;
+    else if(trend>5) score-=8;
+    else score-=3; // minor dip = possible buy opportunity
+  }
+
+  // Volume/Liquidity (0-20 pts): higher volume = easier exit
+  if(vol>=2000) score+=18;
+  else if(vol>=1000) score+=15;
+  else if(vol>=500) score+=12;
+  else if(vol>=200) score+=8;
+  else if(vol>=50) score+=5;
+  else score+=2;
+
+  // Value accessibility (0-10 pts): sub-$500 entry = more upside potential for most investors
+  if(price<=50) score+=10;
+  else if(price<=200) score+=8;
+  else if(price<=500) score+=6;
+  else if(price<=2000) score+=3;
+  else score+=1;
+
+  // Dip-buying bonus: if price is down but volume is high, it's a potential buy-the-dip
+  if(dir==='down' && vol>=500 && trend<=20) score+=8;
+
+  // Blue chip stability bonus: high price + steady = safe store of value
+  if(price>=5000 && dir==='up' && trend<=15) score+=5;
+
+  return Math.max(0,Math.min(100,Math.round(score)));
+}
+
+function getSignal(s){
+  if(s>=85) return {label:'STRONG BUY',cls:'strong-buy'};
+  if(s>=70) return {label:'BUY',cls:'buy'};
+  if(s>=50) return {label:'HOLD',cls:'hold'};
+  if(s>=30) return {label:'WATCH',cls:'watch'};
+  return {label:'SELL',cls:'sell'};
+}
+
+function getReason(c,score){
+  const price=priceNum(c.price),trend=trendNum(c.trend),vol=parseInt(c.vol.replace(/,/g,'')),dir=c.dir;
+  if(score>=85){
+    if(price<100&&vol>1000) return 'Low entry + high volume + strong trend = best risk/reward';
+    if(dir==='up'&&trend>=40) return 'Strong momentum with solid liquidity. Ride the wave.';
+    return 'Multiple bullish signals converging. High conviction play.';
+  }
+  if(score>=70){
+    if(dir==='up'&&trend>=20) return 'Healthy uptrend with good volume. Solid entry point.';
+    if(price<200&&vol>500) return 'Accessible price + good volume = easy in, easy out.';
+    return 'Positive signals outweigh risks. Good risk-adjusted bet.';
+  }
+  if(score>=50){
+    if(dir==='down'&&vol>500) return 'Price dip on high volume — potential buy-the-dip if fundamentals hold.';
+    if(price>5000) return 'Blue chip stability. Safe store of value, slower growth.';
+    return 'Mixed signals. Wait for clearer direction or dollar-cost average.';
+  }
+  if(score>=30){
+    if(dir==='down') return 'Downtrend active. Wait for reversal confirmation before entering.';
+    return 'Weak momentum. Better opportunities elsewhere right now.';
+  }
+  return 'Negative trend + poor signals. Avoid or exit position.';
+}
+
+const icons={basketball:'🏀',football:'🏈',baseball:'⚾',pokemon:'⚡'};
+
+const rawCards=[
 // BASKETBALL
-{r:1,cat:"basketball",name:"Cooper Flagg RC Auto",set:"2025-26 Topps Chrome Basketball",price:"$4,250",vol:"890",trend:"+185%",dir:"up",q:"Cooper Flagg Topps Chrome rookie auto"},
-{r:2,cat:"basketball",name:"Victor Wembanyama Prizm Silver RC",set:"2023-24 Panini Prizm · PSA 10",price:"$1,820",vol:"1,240",trend:"+12%",dir:"up",q:"Wembanyama Prizm Silver PSA 10 rookie"},
-{r:3,cat:"basketball",name:"Kon Knueppel Topps Chrome RC",set:"2025-26 Topps Chrome #254 · Refractors",price:"$85",vol:"2,800",trend:"+78%",dir:"up",q:"Kon Knueppel Topps Chrome rookie"},
+{r:1,cat:"basketball",name:"Cooper Flagg RC Auto",set:"2025-26 Topps Chrome",price:"$4,250",vol:"890",trend:"+185%",dir:"up",q:"Cooper Flagg Topps Chrome rookie auto"},
+{r:2,cat:"basketball",name:"Victor Wembanyama Prizm Silver RC",set:"2023-24 Prizm · PSA 10",price:"$1,820",vol:"1,240",trend:"+12%",dir:"up",q:"Wembanyama Prizm Silver PSA 10 rookie"},
+{r:3,cat:"basketball",name:"Kon Knueppel Topps Chrome RC",set:"2025-26 Topps Chrome #254",price:"$85",vol:"2,800",trend:"+78%",dir:"up",q:"Kon Knueppel Topps Chrome rookie"},
 {r:4,cat:"basketball",name:"Michael Jordan 1986 Fleer RC",set:"1986-87 Fleer #57 · PSA 8-9",price:"$42,500",vol:"85",trend:"+8%",dir:"up",q:"Michael Jordan 1986 Fleer rookie PSA"},
-{r:5,cat:"basketball",name:"Cooper Flagg Chrome Refractor",set:"2025-26 Topps Chrome #251 Refractor",price:"$145",vol:"2,200",trend:"+39%",dir:"up",q:"Cooper Flagg Topps Chrome refractor"},
+{r:5,cat:"basketball",name:"Cooper Flagg Chrome Refractor",set:"2025-26 Topps Chrome #251",price:"$145",vol:"2,200",trend:"+39%",dir:"up",q:"Cooper Flagg Topps Chrome refractor"},
 {r:6,cat:"basketball",name:"Dylan Harper RC Auto",set:"2025-26 Topps Chrome · Auto",price:"$1,150",vol:"525",trend:"+95%",dir:"up",q:"Dylan Harper Topps Chrome rookie auto"},
-{r:7,cat:"basketball",name:"Anthony Edwards Prizm Silver RC",set:"2020-21 Panini Prizm · PSA 10",price:"$2,450",vol:"680",trend:"-5%",dir:"down",q:"Anthony Edwards Prizm Silver PSA 10 rookie"},
-{r:8,cat:"basketball",name:"VJ Edgecombe Topps Chrome RC",set:"2025-26 Topps Chrome · Rookie",price:"$75",vol:"1,600",trend:"+110%",dir:"up",q:"VJ Edgecombe Topps Chrome rookie"},
+{r:7,cat:"basketball",name:"Anthony Edwards Prizm Silver RC",set:"2020-21 Prizm · PSA 10",price:"$2,450",vol:"680",trend:"-5%",dir:"down",q:"Anthony Edwards Prizm Silver PSA 10 rookie"},
+{r:8,cat:"basketball",name:"VJ Edgecombe Topps Chrome RC",set:"2025-26 Topps Chrome",price:"$75",vol:"1,600",trend:"+110%",dir:"up",q:"VJ Edgecombe Topps Chrome rookie"},
 {r:9,cat:"basketball",name:"Kobe Bryant 1996 Topps RC",set:"1996-97 Topps #138",price:"$1,850",vol:"420",trend:"+15%",dir:"up",q:"Kobe Bryant 1996 Topps 138 rookie"},
-{r:10,cat:"basketball",name:"Shai Gilgeous-Alexander Prizm Silver RC",set:"2018-19 Panini Prizm · PSA 10",price:"$1,200",vol:"380",trend:"+22%",dir:"up",q:"Shai Gilgeous-Alexander Prizm Silver PSA 10"},
+{r:10,cat:"basketball",name:"Shai Gilgeous-Alexander Prizm Silver",set:"2018-19 Prizm · PSA 10",price:"$1,200",vol:"380",trend:"+22%",dir:"up",q:"Shai Gilgeous-Alexander Prizm Silver PSA 10"},
 {r:11,cat:"basketball",name:"LeBron James Topps Chrome RC",set:"2003-04 Topps Chrome #111 · PSA 9+",price:"$68,000",vol:"45",trend:"+5%",dir:"up",q:"LeBron James 2003 Topps Chrome rookie PSA"},
-{r:12,cat:"basketball",name:"Yang Hansen Chrome Advisory SSP",set:"2025-26 Topps Chrome #AD-20",price:"$320",vol:"180",trend:"+1,899%",dir:"up",q:"Yang Hansen Topps Chrome advisory SSP"},
-{r:13,cat:"basketball",name:"Luka Doncic Prizm Silver RC",set:"2018-19 Panini Prizm · PSA 10",price:"$3,800",vol:"280",trend:"-8%",dir:"down",q:"Luka Doncic Prizm Silver PSA 10 rookie"},
-{r:14,cat:"basketball",name:"Stephen Curry Prizm Silver RC",set:"2012-13 Panini Prizm · PSA 10",price:"$8,500",vol:"120",trend:"+3%",dir:"up",q:"Stephen Curry Prizm Silver PSA 10 rookie"},
-{r:15,cat:"basketball",name:"Cooper Flagg Power Players Holo",set:"2025 Topps #PP-16 Holo Foil",price:"$35",vol:"3,100",trend:"+136%",dir:"up",q:"Cooper Flagg Power Players Holo Foil"},
-{r:16,cat:"basketball",name:"Giannis Prizm Silver RC",set:"2013-14 Panini Prizm · PSA 10",price:"$4,200",vol:"95",trend:"+10%",dir:"up",q:"Giannis Antetokounmpo Prizm Silver PSA 10 rookie"},
-{r:17,cat:"basketball",name:"Amen Thompson Prizm Silver RC",set:"2023-24 Panini Prizm · PSA 10",price:"$85",vol:"920",trend:"+160%",dir:"up",q:"Amen Thompson Prizm Silver PSA 10 rookie"},
+{r:12,cat:"basketball",name:"Yang Hansen Chrome Advisory SSP",set:"2025-26 Topps Chrome #AD-20",price:"$320",vol:"180",trend:"+1899%",dir:"up",q:"Yang Hansen Topps Chrome advisory SSP"},
+{r:13,cat:"basketball",name:"Luka Doncic Prizm Silver RC",set:"2018-19 Prizm · PSA 10",price:"$3,800",vol:"280",trend:"-8%",dir:"down",q:"Luka Doncic Prizm Silver PSA 10 rookie"},
+{r:14,cat:"basketball",name:"Stephen Curry Prizm Silver RC",set:"2012-13 Prizm · PSA 10",price:"$8,500",vol:"120",trend:"+3%",dir:"up",q:"Stephen Curry Prizm Silver PSA 10 rookie"},
+{r:15,cat:"basketball",name:"Cooper Flagg Power Players Holo",set:"2025 Topps #PP-16",price:"$35",vol:"3,100",trend:"+136%",dir:"up",q:"Cooper Flagg Power Players Holo Foil"},
+{r:16,cat:"basketball",name:"Giannis Prizm Silver RC",set:"2013-14 Prizm · PSA 10",price:"$4,200",vol:"95",trend:"+10%",dir:"up",q:"Giannis Antetokounmpo Prizm Silver PSA 10 rookie"},
+{r:17,cat:"basketball",name:"Amen Thompson Prizm Silver RC",set:"2023-24 Prizm · PSA 10",price:"$85",vol:"920",trend:"+160%",dir:"up",q:"Amen Thompson Prizm Silver PSA 10 rookie"},
 {r:18,cat:"basketball",name:"Cooper Flagg Daydreamers",set:"2025 Topps Midnight #DD-16",price:"$28",vol:"1,800",trend:"+45%",dir:"up",q:"Cooper Flagg Topps Midnight Daydreamers"},
-{r:19,cat:"basketball",name:"Jaylen Brown Prizm Silver",set:"2016-17 Panini Prizm · PSA 10",price:"$450",vol:"340",trend:"+18%",dir:"up",q:"Jaylen Brown Prizm Silver PSA 10"},
-{r:20,cat:"basketball",name:"Wembanyama Topps Finest Insert",set:"2025-26 Topps Finest Basketball",price:"$95",vol:"780",trend:"+20%",dir:"up",q:"Victor Wembanyama Topps Finest basketball"},
+{r:19,cat:"basketball",name:"Jaylen Brown Prizm Silver",set:"2016-17 Prizm · PSA 10",price:"$450",vol:"340",trend:"+18%",dir:"up",q:"Jaylen Brown Prizm Silver PSA 10"},
+{r:20,cat:"basketball",name:"Wembanyama Topps Finest",set:"2025-26 Topps Finest",price:"$95",vol:"780",trend:"+20%",dir:"up",q:"Victor Wembanyama Topps Finest basketball"},
 // FOOTBALL
-{r:1,cat:"football",name:"Caleb Williams Prizm Silver RC",set:"2024 Panini Prizm · PSA 10",price:"$145",vol:"3,200",trend:"-18%",dir:"down",q:"Caleb Williams Prizm Silver PSA 10 rookie"},
-{r:2,cat:"football",name:"Jayden Daniels Prizm Silver RC",set:"2024 Panini Prizm · PSA 10",price:"$185",vol:"2,400",trend:"+22%",dir:"up",q:"Jayden Daniels Prizm Silver PSA 10 rookie"},
-{r:3,cat:"football",name:"Brock Bowers Prizm Silver RC",set:"2024 Panini Prizm · PSA 10",price:"$95",vol:"1,850",trend:"+15%",dir:"up",q:"Brock Bowers Prizm Silver PSA 10 rookie"},
-{r:4,cat:"football",name:"Shedeur Sanders Bowman Chrome Auto",set:"2024 Bowman Chrome University · Auto",price:"$310",vol:"780",trend:"+140%",dir:"up",q:"Shedeur Sanders Bowman Chrome auto"},
-{r:5,cat:"football",name:"Patrick Mahomes Prizm Silver RC",set:"2017 Panini Prizm · PSA 10",price:"$11,500",vol:"720",trend:"+5%",dir:"up",q:"Patrick Mahomes Prizm Silver PSA 10 rookie"},
-{r:6,cat:"football",name:"Quinn Ewers Rookies & Stars Auto",set:"2025 Rookies & Stars #170 · Auto",price:"$65",vol:"950",trend:"+92%",dir:"up",q:"Quinn Ewers Rookies Stars auto rookie"},
-{r:7,cat:"football",name:"Jaxson Dart Mosaic Introductions",set:"2025 Panini Mosaic #2 · No Huddle",price:"$45",vol:"1,200",trend:"+199%",dir:"up",q:"Jaxson Dart Mosaic Introductions rookie"},
-{r:8,cat:"football",name:"Dillon Gabriel Mosaic Kaleidoscopic",set:"2025 Panini Mosaic · SSP",price:"$55",vol:"680",trend:"+89%",dir:"up",q:"Dillon Gabriel Mosaic Kaleidoscopic rookie"},
-{r:9,cat:"football",name:"Tom Brady 2000 Bowman RC",set:"2000 Bowman #236 · Base",price:"$2,800",vol:"320",trend:"+23%",dir:"up",q:"Tom Brady 2000 Bowman 236 rookie PSA"},
-{r:10,cat:"football",name:"Trevor Lawrence Mosaic NFL Debut",set:"2021 Panini Mosaic #241",price:"$35",vol:"880",trend:"+140%",dir:"up",q:"Trevor Lawrence Mosaic NFL Debut"},
+{r:1,cat:"football",name:"Caleb Williams Prizm Silver RC",set:"2024 Prizm · PSA 10",price:"$145",vol:"3,200",trend:"-18%",dir:"down",q:"Caleb Williams Prizm Silver PSA 10 rookie"},
+{r:2,cat:"football",name:"Jayden Daniels Prizm Silver RC",set:"2024 Prizm · PSA 10",price:"$185",vol:"2,400",trend:"+22%",dir:"up",q:"Jayden Daniels Prizm Silver PSA 10 rookie"},
+{r:3,cat:"football",name:"Brock Bowers Prizm Silver RC",set:"2024 Prizm · PSA 10",price:"$95",vol:"1,850",trend:"+15%",dir:"up",q:"Brock Bowers Prizm Silver PSA 10 rookie"},
+{r:4,cat:"football",name:"Shedeur Sanders Bowman Chrome Auto",set:"2024 Bowman Chrome Univ · Auto",price:"$310",vol:"780",trend:"+140%",dir:"up",q:"Shedeur Sanders Bowman Chrome auto"},
+{r:5,cat:"football",name:"Patrick Mahomes Prizm Silver RC",set:"2017 Prizm · PSA 10",price:"$11,500",vol:"720",trend:"+5%",dir:"up",q:"Patrick Mahomes Prizm Silver PSA 10 rookie"},
+{r:6,cat:"football",name:"Quinn Ewers Rookies & Stars Auto",set:"2025 Rookies & Stars #170",price:"$65",vol:"950",trend:"+92%",dir:"up",q:"Quinn Ewers Rookies Stars auto rookie"},
+{r:7,cat:"football",name:"Jaxson Dart Mosaic Introductions",set:"2025 Mosaic #2 · No Huddle",price:"$45",vol:"1,200",trend:"+199%",dir:"up",q:"Jaxson Dart Mosaic Introductions rookie"},
+{r:8,cat:"football",name:"Dillon Gabriel Mosaic Kaleidoscopic",set:"2025 Mosaic · SSP",price:"$55",vol:"680",trend:"+89%",dir:"up",q:"Dillon Gabriel Mosaic Kaleidoscopic rookie"},
+{r:9,cat:"football",name:"Tom Brady 2000 Bowman RC",set:"2000 Bowman #236",price:"$2,800",vol:"320",trend:"+23%",dir:"up",q:"Tom Brady 2000 Bowman 236 rookie PSA"},
+{r:10,cat:"football",name:"Trevor Lawrence Mosaic NFL Debut",set:"2021 Mosaic #241",price:"$35",vol:"880",trend:"+140%",dir:"up",q:"Trevor Lawrence Mosaic NFL Debut"},
 {r:11,cat:"football",name:"Jerry Rice 1986 Topps RC",set:"1986 Topps #161",price:"$285",vol:"450",trend:"+15%",dir:"up",q:"Jerry Rice 1986 Topps 161 rookie"},
-{r:12,cat:"football",name:"Jalen Hurts Prizm Base RC",set:"2020 Panini Prizm #343",price:"$125",vol:"1,100",trend:"+54%",dir:"up",q:"Jalen Hurts Prizm 343 rookie PSA 10"},
-{r:13,cat:"football",name:"Bo Nix Prizm Silver RC",set:"2024 Panini Prizm · PSA 10",price:"$45",vol:"1,400",trend:"+8%",dir:"up",q:"Bo Nix Prizm Silver PSA 10 rookie"},
-{r:14,cat:"football",name:"Josh Allen Prizm Silver RC",set:"2018 Panini Prizm · PSA 10",price:"$5,200",vol:"180",trend:"+12%",dir:"up",q:"Josh Allen Prizm Silver PSA 10 rookie"},
-{r:15,cat:"football",name:"Marvin Harrison Jr Prizm Silver RC",set:"2024 Panini Prizm · PSA 10",price:"$110",vol:"1,600",trend:"-10%",dir:"down",q:"Marvin Harrison Jr Prizm Silver PSA 10"},
-{r:16,cat:"football",name:"Malik Nabers Prizm Silver RC",set:"2024 Panini Prizm · PSA 10",price:"$75",vol:"1,350",trend:"+5%",dir:"up",q:"Malik Nabers Prizm Silver PSA 10 rookie"},
-{r:17,cat:"football",name:"Lamar Jackson Prizm Silver RC",set:"2018 Panini Prizm · PSA 10",price:"$1,800",vol:"240",trend:"+15%",dir:"up",q:"Lamar Jackson Prizm Silver PSA 10 rookie"},
-{r:18,cat:"football",name:"Cam Ward Bowman Chrome Auto",set:"2024 Bowman Chrome University · Auto",price:"$195",vol:"520",trend:"+85%",dir:"up",q:"Cam Ward Bowman Chrome auto"},
-{r:19,cat:"football",name:"Joe Burrow Prizm Silver RC",set:"2020 Panini Prizm · PSA 10",price:"$850",vol:"380",trend:"+20%",dir:"up",q:"Joe Burrow Prizm Silver PSA 10 rookie"},
-{r:20,cat:"football",name:"Saquon Barkley Prizm Silver RC",set:"2018 Panini Prizm · PSA 10",price:"$185",vol:"520",trend:"+35%",dir:"up",q:"Saquon Barkley Prizm Silver PSA 10 rookie"},
+{r:12,cat:"football",name:"Jalen Hurts Prizm Base RC",set:"2020 Prizm #343",price:"$125",vol:"1,100",trend:"+54%",dir:"up",q:"Jalen Hurts Prizm 343 rookie PSA 10"},
+{r:13,cat:"football",name:"Bo Nix Prizm Silver RC",set:"2024 Prizm · PSA 10",price:"$45",vol:"1,400",trend:"+8%",dir:"up",q:"Bo Nix Prizm Silver PSA 10 rookie"},
+{r:14,cat:"football",name:"Josh Allen Prizm Silver RC",set:"2018 Prizm · PSA 10",price:"$5,200",vol:"180",trend:"+12%",dir:"up",q:"Josh Allen Prizm Silver PSA 10 rookie"},
+{r:15,cat:"football",name:"Marvin Harrison Jr Prizm Silver RC",set:"2024 Prizm · PSA 10",price:"$110",vol:"1,600",trend:"-10%",dir:"down",q:"Marvin Harrison Jr Prizm Silver PSA 10"},
+{r:16,cat:"football",name:"Malik Nabers Prizm Silver RC",set:"2024 Prizm · PSA 10",price:"$75",vol:"1,350",trend:"+5%",dir:"up",q:"Malik Nabers Prizm Silver PSA 10 rookie"},
+{r:17,cat:"football",name:"Lamar Jackson Prizm Silver RC",set:"2018 Prizm · PSA 10",price:"$1,800",vol:"240",trend:"+15%",dir:"up",q:"Lamar Jackson Prizm Silver PSA 10 rookie"},
+{r:18,cat:"football",name:"Cam Ward Bowman Chrome Auto",set:"2024 Bowman Chrome Univ · Auto",price:"$195",vol:"520",trend:"+85%",dir:"up",q:"Cam Ward Bowman Chrome auto"},
+{r:19,cat:"football",name:"Joe Burrow Prizm Silver RC",set:"2020 Prizm · PSA 10",price:"$850",vol:"380",trend:"+20%",dir:"up",q:"Joe Burrow Prizm Silver PSA 10 rookie"},
+{r:20,cat:"football",name:"Saquon Barkley Prizm Silver RC",set:"2018 Prizm · PSA 10",price:"$185",vol:"520",trend:"+35%",dir:"up",q:"Saquon Barkley Prizm Silver PSA 10 rookie"},
 // BASEBALL
 {r:1,cat:"baseball",name:"Paul Skenes Topps Chrome RC Auto",set:"2024 Topps Chrome Update · Auto",price:"$525",vol:"1,800",trend:"+35%",dir:"up",q:"Paul Skenes Topps Chrome rookie auto"},
-{r:2,cat:"baseball",name:"Nick Kurtz 2026 Topps Series 1 RC",set:"2026 Topps Series 1 · Base/Parallels",price:"$45",vol:"2,100",trend:"+230%",dir:"up",q:"Nick Kurtz 2026 Topps Series 1 rookie"},
-{r:3,cat:"baseball",name:"Shohei Ohtani Chrome Update RC",set:"2018 Topps Chrome Update · PSA 10",price:"$2,450",vol:"450",trend:"+10%",dir:"up",q:"Shohei Ohtani 2018 Topps Chrome Update PSA 10"},
-{r:4,cat:"baseball",name:"Konnor Griffin Bowman Draft Chrome",set:"2024 Bowman Draft #BDC-22 · 1st Chrome",price:"$42",vol:"2,400",trend:"+57%",dir:"up",q:"Konnor Griffin Bowman Draft Chrome 1st"},
-{r:5,cat:"baseball",name:"Roman Anthony 2026 Topps RC",set:"2026 Topps Series 1 · Titans of the Game",price:"$18",vol:"1,400",trend:"-74%",dir:"down",q:"Roman Anthony 2026 Topps Series 1 rookie"},
+{r:2,cat:"baseball",name:"Nick Kurtz 2026 Topps Series 1 RC",set:"2026 Topps Series 1",price:"$45",vol:"2,100",trend:"+230%",dir:"up",q:"Nick Kurtz 2026 Topps Series 1 rookie"},
+{r:3,cat:"baseball",name:"Shohei Ohtani Chrome Update RC",set:"2018 Chrome Update · PSA 10",price:"$2,450",vol:"450",trend:"+10%",dir:"up",q:"Shohei Ohtani 2018 Topps Chrome Update PSA 10"},
+{r:4,cat:"baseball",name:"Konnor Griffin Bowman Draft Chrome",set:"2024 Bowman Draft #BDC-22 · 1st",price:"$42",vol:"2,400",trend:"+57%",dir:"up",q:"Konnor Griffin Bowman Draft Chrome 1st"},
+{r:5,cat:"baseball",name:"Roman Anthony 2026 Topps RC",set:"2026 Topps Series 1 · TOTG",price:"$18",vol:"1,400",trend:"-74%",dir:"down",q:"Roman Anthony 2026 Topps Series 1 rookie"},
 {r:6,cat:"baseball",name:"Shohei Ohtani 2018 Topps #700 RC",set:"2018 Topps · Pitching",price:"$125",vol:"1,800",trend:"+21%",dir:"up",q:"Shohei Ohtani 2018 Topps 700 rookie"},
 {r:7,cat:"baseball",name:"Pete Crow-Armstrong Chrome RC",set:"2024 Topps Chrome · PSA 10",price:"$85",vol:"650",trend:"+45%",dir:"up",q:"Pete Crow-Armstrong Topps Chrome rookie PSA 10"},
-{r:8,cat:"baseball",name:"Carlos Lagrange Bowman Chrome Auto",set:"2025 Bowman Chrome · 1st Prospect Auto",price:"$180",vol:"780",trend:"+66%",dir:"up",q:"Carlos Lagrange Bowman Chrome prospect auto 1st"},
-{r:9,cat:"baseball",name:"Shohei Ohtani Topps Update #US1 RC",set:"2018 Topps Update",price:"$85",vol:"1,200",trend:"+10%",dir:"up",q:"Shohei Ohtani 2018 Topps Update US1 rookie"},
+{r:8,cat:"baseball",name:"Carlos Lagrange Bowman Chrome Auto",set:"2025 Bowman Chrome · 1st Auto",price:"$180",vol:"780",trend:"+66%",dir:"up",q:"Carlos Lagrange Bowman Chrome prospect auto 1st"},
+{r:9,cat:"baseball",name:"Shohei Ohtani Topps Update RC",set:"2018 Topps Update #US1",price:"$85",vol:"1,200",trend:"+10%",dir:"up",q:"Shohei Ohtani 2018 Topps Update US1 rookie"},
 {r:10,cat:"baseball",name:"Jackson Holliday Bowman Chrome Auto",set:"2023 Bowman Chrome · 1st Auto",price:"$350",vol:"420",trend:"-15%",dir:"down",q:"Jackson Holliday Bowman Chrome 1st auto"},
 {r:11,cat:"baseball",name:"Shohei Ohtani 2018 Bowman RC",set:"2018 Bowman #49",price:"$65",vol:"980",trend:"+2%",dir:"up",q:"Shohei Ohtani 2018 Bowman 49 rookie"},
 {r:12,cat:"baseball",name:"Mickey Mantle 1952 Topps",set:"1952 Topps #311 · PSA 3-5",price:"$185,000",vol:"12",trend:"+5%",dir:"up",q:"Mickey Mantle 1952 Topps 311 PSA"},
 {r:13,cat:"baseball",name:"Elly De La Cruz Chrome RC",set:"2023 Topps Chrome · PSA 10",price:"$75",vol:"850",trend:"-12%",dir:"down",q:"Elly De La Cruz Topps Chrome rookie PSA 10"},
-{r:14,cat:"baseball",name:"Ohtani Chrome Update Debut #HMT32",set:"2018 Topps Chrome Update",price:"$285",vol:"380",trend:"+15%",dir:"up",q:"Shohei Ohtani 2018 Topps Chrome Update HMT32"},
+{r:14,cat:"baseball",name:"Ohtani Chrome Update #HMT32",set:"2018 Chrome Update · Debut",price:"$285",vol:"380",trend:"+15%",dir:"up",q:"Shohei Ohtani 2018 Topps Chrome Update HMT32"},
 {r:15,cat:"baseball",name:"Bobby Witt Jr Chrome RC",set:"2022 Topps Chrome · PSA 10",price:"$145",vol:"520",trend:"+25%",dir:"up",q:"Bobby Witt Jr Topps Chrome rookie PSA 10"},
 {r:16,cat:"baseball",name:"Ken Griffey Jr 1989 Upper Deck RC",set:"1989 Upper Deck #1 · PSA 9-10",price:"$3,200",vol:"95",trend:"+8%",dir:"up",q:"Ken Griffey Jr 1989 Upper Deck 1 rookie PSA"},
-{r:17,cat:"baseball",name:"Mike Trout 2011 Topps Update RC",set:"2011 Topps Update #US175 · PSA 10",price:"$2,800",vol:"110",trend:"+3%",dir:"up",q:"Mike Trout 2011 Topps Update US175 PSA 10"},
+{r:17,cat:"baseball",name:"Mike Trout 2011 Topps Update RC",set:"2011 Update #US175 · PSA 10",price:"$2,800",vol:"110",trend:"+3%",dir:"up",q:"Mike Trout 2011 Topps Update US175 PSA 10"},
 {r:18,cat:"baseball",name:"Gunnar Henderson Chrome RC",set:"2023 Topps Chrome · PSA 10",price:"$95",vol:"680",trend:"+18%",dir:"up",q:"Gunnar Henderson Topps Chrome rookie PSA 10"},
 {r:19,cat:"baseball",name:"Junior Caminero Bowman Chrome Auto",set:"2023 Bowman Chrome · 1st Auto",price:"$120",vol:"340",trend:"-20%",dir:"down",q:"Junior Caminero Bowman Chrome 1st auto"},
-{r:20,cat:"baseball",name:"Paul Skenes Bowman 1st Chrome Auto",set:"2022 Bowman Draft · 1st Chrome Auto",price:"$1,800",vol:"180",trend:"+40%",dir:"up",q:"Paul Skenes Bowman Chrome 1st auto"},
+{r:20,cat:"baseball",name:"Paul Skenes Bowman 1st Chrome Auto",set:"2022 Bowman Draft · 1st Auto",price:"$1,800",vol:"180",trend:"+40%",dir:"up",q:"Paul Skenes Bowman Chrome 1st auto"},
 // POKEMON
 {r:1,cat:"pokemon",name:"Umbreon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 161/131",price:"$1,054",vol:"680",trend:"+19%",dir:"up",q:"Umbreon ex Special Illustration Rare Prismatic Evolutions 161"},
-{r:2,cat:"pokemon",name:"Charizard ex SAR (Prismatic Evo)",set:"Prismatic Evolutions · Special Art Rare",price:"$285",vol:"2,800",trend:"+65%",dir:"up",q:"Charizard ex Special Art Rare Prismatic Evolutions"},
+{r:2,cat:"pokemon",name:"Charizard ex SAR (Prismatic Evo)",set:"Prismatic Evolutions · SAR",price:"$285",vol:"2,800",trend:"+65%",dir:"up",q:"Charizard ex Special Art Rare Prismatic Evolutions"},
 {r:3,cat:"pokemon",name:"Pikachu ex SIR (Surging Sparks)",set:"Surging Sparks 238/191",price:"$195",vol:"1,800",trend:"+40%",dir:"up",q:"Pikachu ex Special Illustration Rare Surging Sparks"},
 {r:4,cat:"pokemon",name:"Umbreon VMAX Alt Art",set:"Evolving Skies #215 · PSA 10",price:"$3,520",vol:"380",trend:"+12%",dir:"up",q:"Umbreon VMAX Alternate Art Evolving Skies PSA 10"},
 {r:5,cat:"pokemon",name:"Sylveon ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 156/131",price:"$309",vol:"920",trend:"+8%",dir:"up",q:"Sylveon ex Special Illustration Rare Prismatic Evolutions"},
@@ -165,47 +307,113 @@ const cards=[
 {r:15,cat:"pokemon",name:"Eevee Heroes Umbreon V Alt Art",set:"Japanese Eevee Heroes · PSA 10",price:"$850",vol:"430",trend:"+8%",dir:"up",q:"Eevee Heroes Umbreon V Alternate Art PSA 10 Japanese"},
 {r:16,cat:"pokemon",name:"Eevee ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 167/131",price:"$117",vol:"520",trend:"-3%",dir:"down",q:"Eevee ex Special Illustration Rare Prismatic Evolutions"},
 {r:17,cat:"pokemon",name:"Ancient Mew Holo Promo",set:"Movie Promo · Near Mint",price:"$65",vol:"1,600",trend:"+30%",dir:"up",q:"Ancient Mew Holo Promo Pokemon movie"},
-{r:18,cat:"pokemon",name:"Mew ex SIR (151) — Bubble Mew",set:"Scarlet & Violet 151 · SIR",price:"$185",vol:"720",trend:"+10%",dir:"up",q:"Mew ex Special Illustration Rare 151 Bubble"},
+{r:18,cat:"pokemon",name:"Mew ex SIR (151) — Bubble Mew",set:"SV 151 · SIR",price:"$185",vol:"720",trend:"+10%",dir:"up",q:"Mew ex Special Illustration Rare 151 Bubble"},
 {r:19,cat:"pokemon",name:"Ceruledge ex SIR (Prismatic Evo)",set:"Prismatic Evolutions 147/131",price:"$94",vol:"480",trend:"+5%",dir:"up",q:"Ceruledge ex Special Illustration Rare Prismatic Evolutions"},
 {r:20,cat:"pokemon",name:"Charizard ex SIR (Obsidian Flames)",set:"Obsidian Flames · SIR",price:"$135",vol:"850",trend:"-8%",dir:"down",q:"Charizard ex Special Illustration Rare Obsidian Flames"}
 ];
-const icons={basketball:'🏀',football:'🏈',baseball:'⚾',pokemon:'⚡'};
-let currentFilter='all',searchTerm='';
+
+// Enrich cards with scores
+const cards=rawCards.map(c=>{
+  const score=calcScore(c);
+  const signal=getSignal(score);
+  const reason=getReason(c,score);
+  return {...c,score,signal,reason};
+});
+
+// Top pick per category
+function renderTopPicks(){
+  const cats=['basketball','football','baseball','pokemon'];
+  const html=cats.map(cat=>{
+    const best=cards.filter(c=>c.cat===cat).sort((a,b)=>b.score-a.score)[0];
+    const s=best.signal;
+    const tcls=best.dir==='up'?'up':'down';
+    return `<div class="pick-card ${cat}">
+      <div class="pick-header">
+        <span class="pick-cat ${cat}">${icons[cat]} #1 ${cat}</span>
+        <div class="pick-score" style="color:${s.cls.includes('buy')?'#22c55e':s.cls==='hold'?'#eab308':'#ef4444'}">${best.score}</div>
+      </div>
+      <div class="pick-name">${best.name}</div>
+      <div class="pick-set">${best.set}</div>
+      <div class="pick-metrics">
+        <div class="pick-metric"><div class="pm-label">Price</div><div class="pm-value">${best.price}</div></div>
+        <div class="pick-metric"><div class="pm-label">Volume</div><div class="pm-value">${best.vol}</div></div>
+        <div class="pick-metric"><div class="pm-label">Trend</div><div class="pm-value ${tcls}">${best.trend}</div></div>
+        <div class="pick-metric"><div class="pm-label">Signal</div><div class="pm-value" style="color:${s.cls.includes('buy')?'#22c55e':s.cls==='hold'?'#eab308':'#a1a1aa'}">${s.label}</div></div>
+      </div>
+      <div class="pick-why">💡 ${best.reason}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('topPicks').innerHTML=`<h2>🏆 Top Pick Per Category</h2><div class="picks-grid">${html}</div>`;
+}
+
+let currentFilter='all',searchTerm='',currentSort='score';
+
 function renderCards(){
   const grid=document.getElementById('cardGrid'),noRes=document.getElementById('noResults');
   grid.innerHTML='';
-  const filtered=cards.filter(c=>{
+  let filtered=cards.filter(c=>{
     const catMatch=currentFilter==='all'||c.cat===currentFilter;
-    const searchMatch=!searchTerm||c.name.toLowerCase().includes(searchTerm)||c.set.toLowerCase().includes(searchTerm)||c.cat.toLowerCase().includes(searchTerm);
+    const searchMatch=!searchTerm||c.name.toLowerCase().includes(searchTerm)||c.set.toLowerCase().includes(searchTerm)||c.cat.includes(searchTerm);
     return catMatch&&searchMatch;
+  });
+  // Sort
+  filtered.sort((a,b)=>{
+    switch(currentSort){
+      case 'score': return b.score-a.score;
+      case 'trend': return trendNum(b.trend)*(b.dir==='up'?1:-1) - trendNum(a.trend)*(a.dir==='up'?1:-1);
+      case 'volume': return parseInt(b.vol.replace(/,/g,''))-parseInt(a.vol.replace(/,/g,''));
+      case 'price-low': return priceNum(a.price)-priceNum(b.price);
+      case 'price-high': return priceNum(b.price)-priceNum(a.price);
+      default: return b.score-a.score;
+    }
   });
   if(!filtered.length){noRes.style.display='block';return}
   noRes.style.display='none';
   filtered.forEach(c=>{
-    const cls=c.dir==='up'?'price-up':c.dir==='down'?'price-down':'price-flat';
+    const s=c.signal;
+    const tcls=c.dir==='up'?'up':c.dir==='down'?'down':'flat';
     const arr=c.dir==='up'?'▲':c.dir==='down'?'▼':'—';
     const link=ebay(c.q);
-    grid.innerHTML+=`<a class="card" href="${link}" target="_blank" rel="noopener" data-category="${c.cat}">
-      <span class="rank">#${c.r}</span>
-      <span class="category-badge badge-${c.cat}">${icons[c.cat]} ${c.cat}</span>
-      <div class="card-name">${c.name}</div>
-      <div class="card-set">${c.set}</div>
-      <div class="stats-row">
-        <div class="stat"><div class="stat-label">Avg Sold</div><div class="stat-value">${c.price}</div></div>
-        <div class="stat"><div class="stat-label">Volume</div><div class="stat-value">${c.vol}</div></div>
-        <div class="stat"><div class="stat-label">30d Trend</div><div class="stat-value ${cls}">${arr} ${c.trend}</div></div>
+    const scoreColor=c.score>=85?'#22c55e':c.score>=70?'#4ade80':c.score>=50?'#eab308':c.score>=30?'#a1a1aa':'#ef4444';
+    grid.innerHTML+=`<a class="card" href="${link}" target="_blank" rel="noopener">
+      <div class="card-top">
+        <div class="card-left">
+          <span class="cat-badge cat-${c.cat}">${icons[c.cat]} ${c.cat}</span>
+          <div class="card-name">${c.name}</div>
+          <div class="card-set">${c.set}</div>
+        </div>
+        <div class="card-right">
+          <div class="inv-score" style="color:${scoreColor}">${c.score}</div>
+          <div class="inv-label">inv score</div>
+          <span class="signal-badge badge-${s.cls}">${s.label}</span>
+        </div>
       </div>
-      <span class="ebay-link">🔗 View eBay Sold Listings →</span>
+      <div class="card-stats">
+        <div class="cs"><div class="cs-label">Price</div><div class="cs-value">${c.price}</div></div>
+        <div class="cs"><div class="cs-label">Volume</div><div class="cs-value">${c.vol}</div></div>
+        <div class="cs"><div class="cs-label">30d</div><div class="cs-value ${tcls}">${arr} ${c.trend}</div></div>
+        <div class="cs"><div class="cs-label">Liquidity</div><div class="cs-value">${parseInt(c.vol.replace(/,/g,''))>=1000?'🟢 High':parseInt(c.vol.replace(/,/g,''))>=400?'🟡 Med':'🔴 Low'}</div></div>
+        <div class="cs"><div class="cs-label">Entry</div><div class="cs-value">${priceNum(c.price)<=100?'🟢 Easy':priceNum(c.price)<=500?'🟡 Mid':'🔴 High'}</div></div>
+      </div>
+      <div class="card-footer">
+        <span class="inv-reason">💡 ${c.reason}</span>
+        <span class="ebay-link">🔗 eBay Sold →</span>
+      </div>
     </a>`;
   });
 }
+
+// Events
 document.querySelectorAll('.filter-tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
     tab.classList.add('active');currentFilter=tab.dataset.filter;renderCards();
   });
 });
-document.getElementById('searchInput').addEventListener('input',(e)=>{searchTerm=e.target.value.toLowerCase().trim();renderCards()});
+document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value.toLowerCase().trim();renderCards()});
+document.getElementById('sortSelect').addEventListener('change',e=>{currentSort=e.target.value;renderCards()});
+
+renderTopPicks();
 renderCards();
 </script>
 </body>
